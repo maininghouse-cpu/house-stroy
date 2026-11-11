@@ -17,6 +17,13 @@
 .gallery figure{flex:0 0 min(72%,440px);width:min(72%,440px);margin:0;scroll-snap-align:start}
 .gallery img{display:block;width:100%;height:290px;object-fit:cover;border-radius:12px;cursor:zoom-in;background:var(--card,#eee)}
 .gallery figcaption{padding:9px 3px 0;font-size:12px;color:var(--muted)}
+.thumb-strip{display:flex;gap:9px;overflow-x:auto;padding:8px 2px 18px;scrollbar-width:thin}
+.thumb{flex:0 0 92px;width:92px;padding:3px;border:2px solid transparent;border-radius:9px;background:var(--surface);cursor:pointer;opacity:.72}
+.thumb.active{border-color:#d71920;opacity:1}
+.thumb img{display:block;width:100%;height:66px;object-fit:cover;border-radius:5px}
+.thumb span{display:block;padding:5px 1px 1px;font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:900px){header{height:auto;min-height:90px;flex-wrap:wrap;padding:14px 20px;gap:12px}.nav{order:3;width:100%;overflow-x:auto;gap:18px;padding:7px 0}.head-actions{margin-left:auto}.tel{display:none}}
+
 .gallery-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0 28px}
 .gallery-controls button,.project-nav a{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:30px;padding:11px 17px;cursor:pointer;font:600 13px Inter}
 .gallery-controls button:disabled{opacity:.35;cursor:default}
@@ -36,6 +43,7 @@
 </style>
 </head>
 <body>
+<header><a class="brand" href="index.html">⌂ <b>HOUSE</b> STROY</a><nav class="nav"><a href="index.html">Главная</a><a class="active" href="projects.html">Проекты</a><a href="portfolio.html">Портфолио</a><a href="reviews.html">Отзывы</a><a href="contacts.html">Контакты</a></nav><div class="head-actions"><div class="tel"><a href="tel:+79251234520">+7 (925) 12345-20</a><br><a href="tel:+79251234530">+7 (925) 12345-30</a></div><button class="theme" type="button">☾ Тёмная тема</button></div></header>
 <main class="detail">
 <a class="back" href="projects.html">← Все проекты</a>
 <div id="content">Загрузка проекта…</div>
@@ -70,6 +78,7 @@ function updateGallery(){
  if(next)next.disabled=idx>=allSlides.length-1;
  const count=document.getElementById("galleryCount");
  if(count)count.textContent=allSlides.length?(idx+1)+" / "+allSlides.length+" · "+categoryNames[slide.category]:"";
+ document.querySelectorAll("[data-thumb]").forEach((b,i)=>{b.classList.toggle("active",i===idx);if(i===idx)b.scrollIntoView({block:"nearest",inline:"nearest",behavior:"smooth"});});
  document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===slide?.category));
 }
 function goToSlide(index,behavior="smooth"){
@@ -99,6 +108,9 @@ function renderGallery(){
  const gallery=document.getElementById("gallery");
  gallery.innerHTML=allSlides.length?allSlides.map((s,i)=>'<figure><img src="'+esc(s.src)+'" alt="'+esc(categoryNames[s.category])+' · '+(i+1)+'" loading="'+(i<2?"eager":"lazy")+'" data-slide="'+i+'"><figcaption>'+categoryNames[s.category]+'</figcaption></figure>').join(""):'<p>В этом проекте пока нет фотографий.</p>';
  gallery.querySelectorAll("img").forEach(img=>img.addEventListener("click",()=>openLightbox(Number(img.dataset.slide))));
+ const strip=document.getElementById("thumbStrip");
+ strip.innerHTML=allSlides.map((s,i)=>'<button type="button" class="thumb" data-thumb="'+i+'" aria-label="Перейти: '+esc(categoryNames[s.category])+' '+(i+1)+'"><img src="'+esc(s.src)+'" alt="" loading="lazy"><span>'+categoryNames[s.category]+' · '+(i+1)+'</span></button>').join("");
+ strip.querySelectorAll("[data-thumb]").forEach(btn=>btn.onclick=()=>goToSlide(Number(btn.dataset.thumb)));
  const controls=document.getElementById("galleryControls");controls.style.display=allSlides.length>0?"flex":"none";
  document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{const idx=allSlides.findIndex(s=>s.category===b.dataset.tab);if(idx>=0)goToSlide(idx);});
  document.getElementById("galleryPrev").onclick=()=>goToSlide(activeSlideIndex()-1);
@@ -116,7 +128,7 @@ function renderGallery(){
  const prev=all[index-1],next=all[index+1];
  root.innerHTML='<div class="detail-hero"><img id="cover" src="'+esc(project.cover)+'" alt="'+esc(project.name)+'"><div><div class="eyebrow">HOUSE STROY / ПРОЕКТ</div><h1>'+esc(project.name)+'</h1><p>'+esc(project.description)+'</p><h2>'+Number(project.price||0).toLocaleString("ru-RU")+' ₽</h2><div class="specs"><div class="spec"><b>'+project.totalArea+' м²</b><br>Общая площадь</div><div class="spec"><b>'+project.livingArea+' м²</b><br>Жилая площадь</div><div class="spec"><b>'+project.floors+'</b><br>Этажность</div><div class="spec"><b>'+project.bedrooms+'</b><br>Спальни</div></div></div></div>'+
  '<div class="tabs"><button data-tab="threeD">3D</button><button data-tab="plans">Планы</button><button data-tab="facades">Фасады</button><button data-tab="images">Фотографии</button></div>'+
- '<div class="gallery-wrap"><div class="gallery" id="gallery"></div><div class="gallery-controls" id="galleryControls"><button id="galleryPrev" type="button" aria-label="Предыдущее изображение">← Назад</button><span class="gallery-count" id="galleryCount"></span><button id="galleryNext" type="button" aria-label="Следующее изображение">Вперёд →</button></div></div>'+
+ '<div class="gallery-wrap"><div class="gallery" id="gallery"></div><div class="thumb-strip" id="thumbStrip" aria-label="Миниатюры всех изображений"></div><div class="gallery-controls" id="galleryControls"><button id="galleryPrev" type="button" aria-label="Предыдущее изображение">← Назад</button><span class="gallery-count" id="galleryCount"></span><button id="galleryNext" type="button" aria-label="Следующее изображение">Вперёд →</button></div></div>'+
  '<nav class="project-nav" aria-label="Навигация по проектам">'+(prev?'<a href="project.html?id='+encodeURIComponent(prev.id)+'"><small>← Предыдущий проект</small><strong>'+esc(prev.name)+'</strong></a>':'<span></span>')+(next?'<a href="project.html?id='+encodeURIComponent(next.id)+'"><small>Следующий проект →</small><strong>'+esc(next.name)+'</strong></a>':'<span></span>')+'</nav>';
  document.getElementById("cover").onclick=()=>{if(project.cover){const old=allSlides;allSlides=[{src:project.cover,category:"cover"}];openLightbox(0);allSlides=old;}};
  renderGallery();
