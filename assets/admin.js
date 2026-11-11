@@ -46,10 +46,12 @@ async function uploadFile(file,projectId,kind){
  if(error)throw error;return {path,url:publicUrl(path)};
 }
 async function saveProject(e){
- e.preventDefault();const saveBtn=document.querySelector('#editor button[type="submit"]');if(saveBtn)saveBtn.disabled=true;
+ e?.preventDefault();
+ const saveBtn=$("saveProjectBtn");if(saveBtn)saveBtn.disabled=true;
+ status("editorStatus","Сохраняю проект и фотографии…");
  try{
   const id=currentId||crypto.randomUUID(),name=$("name").value.trim(),old=projects.find(p=>p.id===id);
-  if(!name)throw new Error("Укажите название проекта.");
+  if(!name){$("name").focus();throw new Error("Сначала укажите название проекта.");}
   const specs={...(old?.specifications||{})};
   let coverPath=cover?.path||null,coverUrl=cover?.path?null:(cover?.url||null);
   if(cover?.file){const uploaded=await uploadFile(cover.file,id,"cover");coverPath=uploaded.path;coverUrl=null;}
@@ -126,7 +128,7 @@ $("loginForm").onsubmit=async e=>{
  await openWorkspace();
 };
 $("logout").onclick=async()=>{await sb.auth.signOut();location.reload();};
-$("new").onclick=clearForm;$("clear").onclick=clearForm;$("delete").onclick=deleteProject;$("editor").onsubmit=saveProject;
+$("new").onclick=clearForm;$("clear").onclick=clearForm;$("delete").onclick=deleteProject;$("saveProjectBtn").addEventListener("click",saveProject);
 $("coverFile")?.addEventListener("change",e=>addFiles("cover",e.target.files));
 setupUploads();sb.auth.onAuthStateChange((_event)=>{setTimeout(openWorkspace,0);});openWorkspace();
 })();
