@@ -37,13 +37,31 @@ function loadForm(id){
  $("id").value=p.id;$("name").value=p.name;$("price").value=p.price;$("totalArea").value=p.totalArea;$("livingArea").value=p.livingArea;$("floors").value=p.floors;$("bedrooms").value=p.bedrooms;$("bathrooms").value=p.bathrooms;$("shortDescription").value=p.shortDescription;$("description").value=p.description;$("published").checked=p.published;$("featured").checked=p.featured;$("delete").disabled=false;
  renderThumbs("cover");Object.keys(categories).forEach(renderThumbs);status("editorStatus","Редактирование проекта. Сохраните изменения после проверки.");
 }
-async function uploadFile(file,projectId,kind){
+async function compressImage(file){
  if(!file.type.startsWith("image/"))throw new Error("Разрешены только изображения.");
  if(file.size>50*1024*1024)throw new Error("Файл превышает лимит 50 МБ.");
- const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
+ if(!("createImageBitmap" in window))return file;
+ let bitmap;
+ try{bitmap=await createImageBitmap(file);}catch(_){return file;}
+ try{
+  const maxSide=2200,scale=Math.min(1,maxSide/Math.max(bitmap.width,bitmap.height));
+  if(scale===1&&file.size<450*1024)return file;
+  const canvas=document.createElement("canvas");
+  canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+  const ctx=canvas.getContext("2d",{alpha:false});ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/webp",0.82));
+  if(!blob||blob.size>=file.size)return file;
+  const base=file.name.replace(/\\.[^.]+$/,"")||"image";
+  return new File([blob],base+".webp",{type:"image/webp",lastModified:Date.now()});
+ }finally{bitmap.close?.();}
+}
+async function uploadFile(file,projectId,kind){
+ const optimized=await compressImage(file);
+ const ext=optimized.type==="image/webp"?"webp":optimized.type==="image/png"?"png":optimized.type==="image/avif"?"avif":"jpg";
  const path=projectId+"/"+kind+"/"+crypto.randomUUID()+"."+ext;
- const {error}=await sb.storage.from("project-media").upload(path,file,{contentType:file.type,upsert:false});
- if(error)throw error;return {path,url:publicUrl(path)};
+ const {error}=await sb.storage.from("project-media").upload(path,optimized,{contentType:optimized.type,upsert:false});
+ if(error)throw error;
+ return {path,url:publicUrl(path),optimizedBytes:optimized.size,originalBytes:file.size};
 }
 async function saveProject(e){
  e?.preventDefault();
@@ -128,7 +146,14 @@ $("loginForm").onsubmit=async e=>{
  await openWorkspace();
 };
 $("logout").onclick=async()=>{await sb.auth.signOut();location.reload();};
-$("new").onclick=clearForm;$("clear").onclick=clearForm;$("delete").onclick=deleteProject;$("saveProjectBtn").addEventListener("click",saveProject);
+$("new").onclick=clearForm;$("clear").onclick=clearForm;$("delete").onclick=deleteProject;document.addEventListener("click",e=>{
+ const btn=e.target.closest("#saveProjectBtn");
+ if(!btn)return;
+ e.preventDefault();
+ if(btn.dataset.busy==="1")return;
+ btn.dataset.busy="1";
+ Promise.resolve(saveProject(e)).finally(()=>{btn.dataset.busy="0";});
+},true);
 $("coverFile")?.addEventListener("change",e=>addFiles("cover",e.target.files));
 setupUploads();sb.auth.onAuthStateChange((_event)=>{setTimeout(openWorkspace,0);});openWorkspace();
 })();
