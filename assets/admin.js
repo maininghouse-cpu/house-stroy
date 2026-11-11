@@ -44,12 +44,12 @@ async function compressImage(file){
  let bitmap;
  try{bitmap=await createImageBitmap(file);}catch(_){return file;}
  try{
-  const maxSide=2200,scale=Math.min(1,maxSide/Math.max(bitmap.width,bitmap.height));
-  if(scale===1&&file.size<450*1024)return file;
+  const maxSide=1600,scale=Math.min(1,maxSide/Math.max(bitmap.width,bitmap.height));
+  if(scale===1&&file.size<250*1024&&file.type==="image/webp")return file;
   const canvas=document.createElement("canvas");
   canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
   const ctx=canvas.getContext("2d",{alpha:false});ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
-  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/webp",0.82));
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/webp",0.76));
   if(!blob||blob.size>=file.size)return file;
   const base=file.name.replace(/\\.[^.]+$/,"")||"image";
   return new File([blob],base+".webp",{type:"image/webp",lastModified:Date.now()});
