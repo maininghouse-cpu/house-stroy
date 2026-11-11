@@ -11,7 +11,7 @@ function mapProject(row) {
  const spec=row.specifications||{}, rows=row.project_media||[];
  const grouped={images:[],threeD:[],plans:[],facades:[]};
  rows.sort((a,b)=>a.sort_order-b.sort_order).forEach(m=>{if(grouped[m.category])grouped[m.category].push({id:m.id,path:m.storage_path,url:publicUrl(m.storage_path),title:m.title||""})});
- return {id:row.id,slug:row.slug,name:row.title,description:row.description||"",shortDescription:row.short_description||"",price:row.price||0,totalArea:row.total_area||0,livingArea:row.living_area||0,floors:row.floors||1,bedrooms:row.bedrooms||0,bathrooms:row.bathrooms||0,published:row.is_published,featured:row.is_featured,sortOrder:row.sort_order||0,cover:spec.cover_path?{path:spec.cover_path,url:publicUrl(spec.cover_path)}:(spec.cover_url?{path:null,url:spec.cover_url}:null),media:grouped};
+ return {id:row.id,slug:row.slug,specifications:spec,name:row.title,description:row.description||"",shortDescription:row.short_description||"",price:row.price||0,totalArea:row.total_area||0,livingArea:row.living_area||0,floors:row.floors||1,bedrooms:row.bedrooms||0,bathrooms:row.bathrooms||0,published:row.is_published,featured:row.is_featured,sortOrder:row.sort_order||0,cover:spec.cover_path?{path:spec.cover_path,url:publicUrl(spec.cover_path)}:(spec.cover_url?{path:null,url:spec.cover_url}:null),media:grouped};
 }
 async function loadProjects() {
  const {data,error}=await sb.from("projects").select("*, project_media(*)").order("sort_order").order("created_at",{ascending:false});
@@ -46,7 +46,7 @@ async function uploadFile(file,projectId,kind){
  if(error)throw error;return {path,url:publicUrl(path)};
 }
 async function saveProject(e){
- e.preventDefault();const saveBtn=$('button[type="submit"]');saveBtn.disabled=true;
+ e.preventDefault();const saveBtn=document.querySelector('#editor button[type="submit"]');if(saveBtn)saveBtn.disabled=true;
  try{
   const id=currentId||crypto.randomUUID(),name=$("name").value.trim(),old=projects.find(p=>p.id===id);
   if(!name)throw new Error("Укажите название проекта.");
@@ -83,7 +83,7 @@ async function saveProject(e){
   }
   await loadProjects();loadForm(id);status("editorStatus","Проект сохранён в Supabase. "+(row.is_published?"Он опубликован на сайте.":"Он сохранён как черновик."));
  }catch(err){console.error(err);status("editorStatus","Ошибка сохранения: "+(err.message||"неизвестная ошибка"),true);}
- finally{saveBtn.disabled=false;}
+ finally{if(saveBtn)saveBtn.disabled=false;}
 }
 async function deleteProject(){
  if(!currentId||!confirm("Удалить проект и связанные фотографии?"))return;
