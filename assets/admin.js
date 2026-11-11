@@ -65,6 +65,7 @@ async function uploadFile(file,projectId,kind){
 }
 async function saveProject(e){
  e?.preventDefault();
+ status("editorStatus","Нажатие зарегистрировано. Начинаю сохранение…");
  const saveBtn=$("saveProjectBtn");if(saveBtn)saveBtn.disabled=true;
  status("editorStatus","Сохраняю проект и фотографии…");
  try{
@@ -105,6 +106,7 @@ async function saveProject(e){
  }catch(err){console.error(err);status("editorStatus","Ошибка сохранения: "+(err.message||"неизвестная ошибка"),true);}
  finally{if(saveBtn)saveBtn.disabled=false;}
 }
+window.houseStroySaveProject = saveProject;
 async function deleteProject(){
  if(!currentId||!confirm("Удалить проект и связанные фотографии?"))return;
  try{
