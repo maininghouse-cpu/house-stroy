@@ -56,7 +56,7 @@ async function saveProject(e){
   if(cover===null){coverPath=null;coverUrl=null;}
   if(coverPath)specs.cover_path=coverPath;else delete specs.cover_path;
   if(coverUrl)specs.cover_url=coverUrl;else delete specs.cover_url;
-  const row={id,slug:slugify(name),title:name,short_description:$("shortDescription").value.trim(),description:$("description").value.trim(),total_area:Number($("totalArea").value)||null,living_area:Number($("livingArea").value)||null,price:Number($("price").value)||null,floors:Number($("floors").value)||1,bedrooms:Number($("bedrooms").value)||0,bathrooms:Number($("bathrooms").value)||0,is_published:$("published").checked,is_featured:$("featured").checked,sort_order:old?.sortOrder||0,specifications:specs};
+  const row={id,slug:slugify(name)+"-"+id.slice(0,8),title:name,short_description:$("shortDescription").value.trim(),description:$("description").value.trim(),total_area:Number($("totalArea").value)||null,living_area:Number($("livingArea").value)||null,price:Number($("price").value)||null,floors:Number($("floors").value)||1,bedrooms:Number($("bedrooms").value)||0,bathrooms:Number($("bathrooms").value)||0,is_published:$("published").checked,is_featured:$("featured").checked,sort_order:old?.sortOrder||0,specifications:specs};
   const {error:upsertError}=await sb.from("projects").upsert(row);if(upsertError)throw upsertError;
   const keepPaths=new Set();if(coverPath)keepPaths.add(coverPath);
   const inserts=[];
@@ -75,6 +75,12 @@ async function saveProject(e){
    const {error}=await sb.storage.from("project-media").remove(removed);if(error)console.warn("Не удалось удалить старые файлы",error);
   }
   if(inserts.length){const {error}=await sb.from("project_media").insert(inserts);if(error)throw error;}
+  for(const [category,list] of Object.entries(media)){
+   for(let i=0;i<list.length;i++){
+    const item=list[i];
+    if(item.id){const {error}=await sb.from("project_media").update({sort_order:i}).eq("id",item.id);if(error)throw error;}
+   }
+  }
   await loadProjects();loadForm(id);status("editorStatus","Проект сохранён в Supabase. "+(row.is_published?"Он опубликован на сайте.":"Он сохранён как черновик."));
  }catch(err){console.error(err);status("editorStatus","Ошибка сохранения: "+(err.message||"неизвестная ошибка"),true);}
  finally{saveBtn.disabled=false;}
