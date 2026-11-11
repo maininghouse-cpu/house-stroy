@@ -1,14 +1,95 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Проект — HOUSE STROY</title><link rel="stylesheet" href="assets/style.css"><style>
-.detail{max-width:1120px;margin:50px auto;padding:0 24px}.detail-hero{display:grid;grid-template-columns:1.3fr 1fr;gap:28px}.detail-hero img{width:100%;height:390px;object-fit:cover;border-radius:18px;cursor:zoom-in}.specs{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:20px 0}.spec{background:var(--card,#f4f4f4);padding:16px;border-radius:12px}.tabs{display:flex;gap:10px;margin:30px 0 18px;flex-wrap:wrap}.tabs button{padding:12px 20px;border:1px solid #aaa;border-radius:30px;background:transparent;cursor:pointer}.tabs button.active{background:#b82025;color:white}.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.gallery img{width:100%;height:220px;object-fit:cover;border-radius:12px;cursor:zoom-in}#lightbox{position:fixed;inset:0;background:#000e;display:none;align-items:center;justify-content:center;z-index:99}#lightbox img{max-width:92vw;max-height:90vh}.back{display:inline-block;margin-bottom:20px}@media(max-width:750px){.detail-hero{grid-template-columns:1fr}.detail-hero img{height:260px}}
-</style></head><body><main class="detail"><a class="back" href="projects.html">← Все проекты</a><div id="content">Загрузка проекта…</div></main><div id="lightbox" onclick="this.style.display='none'"><img alt="Увеличенное изображение"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script><script src="assets/supabase-config.js"></script><script src="assets/projects.js"></script>
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Проект — HOUSE STROY</title><link rel="stylesheet" href="assets/style.css">
+<style>
+.detail{max-width:1120px;margin:50px auto;padding:0 24px}
+.detail-hero{display:grid;grid-template-columns:1.3fr 1fr;gap:28px}
+.detail-hero>img{width:100%;height:390px;object-fit:cover;border-radius:18px;cursor:zoom-in}
+.specs{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:20px 0}
+.spec{background:var(--card,#f4f4f4);padding:16px;border-radius:12px}
+.tabs{display:flex;gap:10px;margin:30px 0 18px;flex-wrap:wrap}
+.tabs button{padding:12px 20px;border:1px solid #aaa;border-radius:30px;background:transparent;color:var(--text);cursor:pointer}
+.tabs button.active{background:#b82025;color:white;border-color:#b82025}
+.gallery-wrap{position:relative}
+.gallery{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding:2px 2px 16px;scrollbar-width:thin}
+.gallery img{flex:0 0 min(72%,360px);width:min(72%,360px);height:250px;object-fit:cover;border-radius:12px;cursor:zoom-in;scroll-snap-align:start}
+.gallery-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0 28px}
+.gallery-controls button,.project-nav a{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:30px;padding:11px 17px;cursor:pointer;font:600 13px Inter}
+.gallery-controls button:disabled{opacity:.35;cursor:default}
+.gallery-count{font-size:12px;color:var(--muted)}
+.project-nav{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:42px 0 20px}
+.project-nav a{display:block;border-radius:14px;padding:18px 20px}
+.project-nav a:last-child{text-align:right}
+.project-nav small{display:block;color:var(--muted);font-size:11px;margin-bottom:7px}
+.project-nav strong{font-size:14px}
+#lightbox{position:fixed;inset:0;background:#000e;display:none;align-items:center;justify-content:center;z-index:99;padding:24px}
+#lightbox img{max-width:92vw;max-height:88vh;object-fit:contain}
+#lightbox button{position:absolute;border:1px solid #ffffff77;background:#111a;color:#fff;border-radius:50%;width:44px;height:44px;font-size:24px;cursor:pointer}
+#lightbox .close{top:20px;right:20px}#lightbox .prev{left:20px}#lightbox .next{right:20px}
+.back{display:inline-block;margin-bottom:20px}
+@media(max-width:750px){.detail-hero{grid-template-columns:1fr}.detail-hero>img{height:260px}.gallery img{flex-basis:82%;width:82%;height:220px}.detail{margin:28px auto;padding:0 16px}.project-nav{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="detail">
+<a class="back" href="projects.html">← Все проекты</a>
+<div id="content">Загрузка проекта…</div>
+</main>
+<div id="lightbox" aria-label="Просмотр фотографий">
+<button class="close" type="button" aria-label="Закрыть">×</button>
+<button class="prev" type="button" aria-label="Предыдущее фото">‹</button>
+<img alt="Увеличенное изображение">
+<button class="next" type="button" aria-label="Следующее фото">›</button>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="assets/supabase-config.js"></script><script src="assets/projects.js"></script>
 <script>
 const params=new URLSearchParams(location.search),root=document.getElementById("content");
+let currentPhotos=[],photoIndex=0;
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function bindZoom(){document.querySelectorAll(".zoom").forEach(i=>i.onclick=()=>{const b=document.getElementById("lightbox");b.querySelector("img").src=i.src;b.style.display="flex";});}
-(async()=>{try{const all=await HouseProjects.load(),p=all.find(x=>String(x.id)===params.get("id")||x.slug===params.get("id"));if(!p){root.innerHTML="<h1>Проект не найден</h1>";return;}
-root.innerHTML='<div class="detail-hero"><img class="zoom" src="'+esc(p.cover)+'" alt="'+esc(p.name)+'"><div><div class="eyebrow">HOUSE STROY / ПРОЕКТ</div><h1>'+esc(p.name)+'</h1><p>'+esc(p.description)+'</p><h2>'+Number(p.price||0).toLocaleString("ru-RU")+' ₽</h2><div class="specs"><div class="spec"><b>'+p.totalArea+' м²</b><br>Общая площадь</div><div class="spec"><b>'+p.livingArea+' м²</b><br>Жилая площадь</div><div class="spec"><b>'+p.floors+'</b><br>Этажность</div><div class="spec"><b>'+p.bedrooms+'</b><br>Спальни</div></div></div></div><div class="tabs"><button class="active" data-tab="images">Фотографии</button><button data-tab="threeD">3D</button><button data-tab="plans">Планы</button><button data-tab="facades">Фасады</button></div><div class="gallery" id="gallery"></div>';
-const draw=key=>{const arr=p[key]||[];document.getElementById("gallery").innerHTML=arr.length?arr.map(src=>'<img class="zoom" src="'+esc(src)+'" alt="Изображение проекта" loading="lazy">').join(""):"<p>В этом разделе пока нет изображений.</p>";bindZoom();};
-document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-tab]").forEach(x=>x.classList.remove("active"));b.classList.add("active");draw(b.dataset.tab);});draw("images");bindZoom();
-}catch(e){console.error(e);root.innerHTML="<h1>Не удалось загрузить проект</h1><p>Попробуйте обновить страницу.</p>";}})();
-</script></body></html>
+function updateGalleryControls(){
+ const g=document.getElementById("gallery");if(!g)return;
+ const prev=document.getElementById("galleryPrev"),next=document.getElementById("galleryNext");
+ if(prev)prev.disabled=g.scrollLeft<=2;
+ if(next)next.disabled=g.scrollLeft+g.clientWidth>=g.scrollWidth-2;
+ const count=document.getElementById("galleryCount");
+ if(count){const imgs=[...g.querySelectorAll("img")];let n=0;for(let i=0;i<imgs.length;i++){if(imgs[i].offsetLeft+imgs[i].offsetWidth/2>=g.scrollLeft+g.clientWidth/2){n=i+1;break;}}count.textContent=imgs.length?(n||imgs.length)+" / "+imgs.length:"";}
+}
+function openLightbox(index){if(!currentPhotos.length)return;photoIndex=(index+currentPhotos.length)%currentPhotos.length;const box=document.getElementById("lightbox");box.querySelector("img").src=currentPhotos[photoIndex];box.style.display="flex";}
+function changeLightbox(step){openLightbox(photoIndex+step);}
+const lightbox=document.getElementById("lightbox");
+lightbox.querySelector(".close").onclick=()=>lightbox.style.display="none";
+lightbox.querySelector(".prev").onclick=()=>changeLightbox(-1);
+lightbox.querySelector(".next").onclick=()=>changeLightbox(1);
+lightbox.addEventListener("click",e=>{if(e.target===lightbox)lightbox.style.display="none";});
+document.addEventListener("keydown",e=>{if(lightbox.style.display==="flex"){if(e.key==="Escape")lightbox.style.display="none";if(e.key==="ArrowLeft")changeLightbox(-1);if(e.key==="ArrowRight")changeLightbox(1);}});
+function draw(key){
+ const arr=p[key]||[];currentPhotos=arr;
+ const g=document.getElementById("gallery");
+ g.innerHTML=arr.length?arr.map((src,i)=>'<img src="'+esc(src)+'" alt="Изображение проекта" loading="lazy" data-photo="'+i+'">').join(""):"<p>В этом разделе пока нет изображений.</p>";
+ g.querySelectorAll("img").forEach(img=>img.addEventListener("click",()=>openLightbox(Number(img.dataset.photo))));
+ const controls=document.getElementById("galleryControls");if(controls)controls.style.display=arr.length>1?"flex":"none";
+ updateGalleryControls();
+}
+let p;
+(async()=>{try{
+ const all=await HouseProjects.load();
+ const index=all.findIndex(x=>String(x.id)===params.get("id")||x.slug===params.get("id"));
+ if(index<0){root.innerHTML="<h1>Проект не найден</h1>";return;}
+ p=all[index];
+ const prev=all[index-1],next=all[index+1];
+ root.innerHTML='<div class="detail-hero"><img id="cover" src="'+esc(p.cover)+'" alt="'+esc(p.name)+'"><div><div class="eyebrow">HOUSE STROY / ПРОЕКТ</div><h1>'+esc(p.name)+'</h1><p>'+esc(p.description)+'</p><h2>'+Number(p.price||0).toLocaleString("ru-RU")+' ₽</h2><div class="specs"><div class="spec"><b>'+p.totalArea+' м²</b><br>Общая площадь</div><div class="spec"><b>'+p.livingArea+' м²</b><br>Жилая площадь</div><div class="spec"><b>'+p.floors+'</b><br>Этажность</div><div class="spec"><b>'+p.bedrooms+'</b><br>Спальни</div></div></div></div>'+
+ '<div class="tabs"><button data-tab="threeD">3D</button><button data-tab="plans">Планы</button><button data-tab="facades">Фасады</button><button class="active" data-tab="images">Фотографии</button></div>'+
+ '<div class="gallery-wrap"><div class="gallery" id="gallery"></div><div class="gallery-controls" id="galleryControls"><button id="galleryPrev" type="button" aria-label="Прокрутить назад">← Назад</button><span class="gallery-count" id="galleryCount"></span><button id="galleryNext" type="button" aria-label="Прокрутить вперёд">Вперёд →</button></div></div>'+
+ '<nav class="project-nav" aria-label="Навигация по проектам">'+(prev?'<a href="project.html?id='+encodeURIComponent(prev.id)+'"><small>← Предыдущий проект</small><strong>'+esc(prev.name)+'</strong></a>':'<span></span>')+(next?'<a href="project.html?id='+encodeURIComponent(next.id)+'"><small>Следующий проект →</small><strong>'+esc(next.name)+'</strong></a>':'<span></span>')+'</nav>';
+ document.getElementById("cover").onclick=()=>{currentPhotos=[p.cover];openLightbox(0);};
+ document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-tab]").forEach(x=>x.classList.remove("active"));b.classList.add("active");draw(b.dataset.tab);});
+ document.getElementById("galleryPrev").onclick=()=>document.getElementById("gallery").scrollBy({left:-380,behavior:"smooth"});
+ document.getElementById("galleryNext").onclick=()=>document.getElementById("gallery").scrollBy({left:380,behavior:"smooth"});
+ const gallery=document.getElementById("gallery");gallery.addEventListener("scroll",updateGalleryControls);window.addEventListener("resize",updateGalleryControls);
+ draw("images");
+ }catch(e){console.error(e);root.innerHTML="<h1>Не удалось загрузить проект</h1><p>Попробуйте обновить страницу.</p>";}})();
+</script>
+</body></html>
