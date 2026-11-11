@@ -1,17 +1,126 @@
-(()=>{const $=id=>document.getElementById(id), groups={threeD:'Изображения 3D',plans:'Планы',facades:'Фасады',images:'Дополнительные фото'};let data=HouseProjects.get(),current=null,files={cover:null,threeD:[],plans:[],facades:[],images:[]};
-const uid=()=>Math.random().toString(36).slice(2,10);
-function renderList(){ $('projectList').innerHTML=data.map(p=>`<div class="project-row"><span>${p.name}</span><button type="button" data-edit="${p.id}">Изменить</button></div>`).join('')||'<p>Проектов нет</p>';document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>load(b.dataset.edit))}
-function clear(){current=null;files={cover:null,threeD:[],plans:[],facades:[],images:[]};$('editor').reset();$('id').value='';$('coverPreview').innerHTML='';$('delete').disabled=true;Object.keys(groups).forEach(k=>renderThumbs(k,[]))}
-function load(id){const p=data.find(x=>x.id===id);if(!p)return;current=p.id;files={cover:p.cover||null,threeD:[...(p.threeD||[])],plans:[...(p.plans||[])],facades:[...(p.facades||[])],images:[...(p.images||[])]};['id','name','price','totalArea','livingArea','floors','bedrooms','description'].forEach(k=>$(k).value=p[k]??'');$('coverUrl').value='';renderThumbs('cover',files.cover?[files.cover]:[]);Object.keys(groups).forEach(k=>renderThumbs(k,files[k]));$('delete').disabled=false}
-function renderThumbs(k,arr){const el=$(k==='cover'?'coverPreview':k+'Thumbs');if(!el)return;el.innerHTML=arr.map((src,i)=>`<div class="thumb"><img src="${src}" alt=""><button type="button" data-remove="${k}" data-index="${i}">×</button></div>`).join('');el.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{const key=b.dataset.remove;if(key==='cover')files.cover=null;else files[key].splice(+b.dataset.index,1);renderThumbs(key,key==='cover'?(files.cover?[files.cover]:[]):files[key])})}
-function fileData(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
-async function addFiles(key,list){for(const f of [...list])if(f.type.startsWith('image/')){const url=await fileData(f);if(key==='cover')files.cover=url;else files[key].push(url)}renderThumbs(key,key==='cover'?(files.cover?[files.cover]:[]):files[key])}
-$('imageGroups').innerHTML=Object.entries(groups).map(([k,label])=>`<div class="group"><h3>${label}</h3><div class="drop" data-drop="${k}">Перетащите сюда изображения или нажмите для выбора<input type="file" accept="image/*" multiple hidden></div><div class="thumbs" id="${k}Thumbs"></div></div>`).join('');
-document.querySelectorAll('[data-drop]').forEach(el=>{const key=el.dataset.drop,input=el.querySelector('input');el.onclick=e=>{if(e.target!==input)input.click()};input.onchange=()=>addFiles(key,input.files);el.ondragover=e=>{e.preventDefault();el.classList.add('over')};el.ondragleave=()=>el.classList.remove('over');el.ondrop=e=>{e.preventDefault();el.classList.remove('over');addFiles(key,e.dataTransfer.files)}});
-$('coverFile').onchange=e=>addFiles('cover',e.target.files);
-$('editor').onsubmit=e=>{e.preventDefault();const id=$('id').value||uid();const p={id,name:$('name').value.trim(),description:$('description').value.trim(),price:+$('price').value||0,totalArea:+$('totalArea').value||0,livingArea:+$('livingArea').value||0,floors:+$('floors').value||1,bedrooms:+$('bedrooms').value||0,cover:files.cover||$('coverUrl').value.trim(),threeD:files.threeD,plans:files.plans,facades:files.facades,images:files.images};const i=data.findIndex(x=>x.id===id);if(i<0)data.push(p);else data[i]=p;HouseProjects.save(data);renderList();load(id);alert('Проект сохранён. Каталог сайта обновлён в этом браузере.')};
-$('new').onclick=clear;$('clear').onclick=clear;$('delete').onclick=()=>{if(current&&confirm('Удалить этот проект?')){data=data.filter(p=>p.id!==current);HouseProjects.save(data);renderList();clear()}};
-$('export').onclick=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='house-stroy-projects.json';a.click();URL.revokeObjectURL(a.href)};
-$('importFile').onchange=async e=>{try{const arr=JSON.parse(await e.target.files[0].text());if(!Array.isArray(arr))throw Error();data=arr;HouseProjects.save(data);renderList();clear();alert('Каталог импортирован')}catch(err){alert('Не удалось прочитать JSON-файл')}};
-renderList();clear();
+(() => {
+const sb = window.houseStroyClient;
+const $ = id => document.getElementById(id);
+const categories = { images: "Дополнительные фотографии", threeD: "3D-визуализации", plans: "Планы этажей", facades: "Фасады" };
+let projects = [], currentId = null, cover = null, media = {images:[],threeD:[],plans:[],facades:[]}, user = null;
+const status = (id, msg, bad=false) => { const el=$(id); if(el){el.textContent=msg;el.style.color=bad?"#b82025":"";} };
+const slugify = s => s.toLowerCase().trim().replace(/ё/g,"e").replace(/[^a-zа-я0-9]+/gi,"-").replace(/^-|-$/g,"") || "house";
+const escapeHtml = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const publicUrl = path => path ? sb.storage.from("project-media").getPublicUrl(path).data.publicUrl : "";
+function mapProject(row) {
+ const spec=row.specifications||{}, rows=row.project_media||[];
+ const grouped={images:[],threeD:[],plans:[],facades:[]};
+ rows.sort((a,b)=>a.sort_order-b.sort_order).forEach(m=>{if(grouped[m.category])grouped[m.category].push({id:m.id,path:m.storage_path,url:publicUrl(m.storage_path),title:m.title||""})});
+ return {id:row.id,slug:row.slug,name:row.title,description:row.description||"",shortDescription:row.short_description||"",price:row.price||0,totalArea:row.total_area||0,livingArea:row.living_area||0,floors:row.floors||1,bedrooms:row.bedrooms||0,bathrooms:row.bathrooms||0,published:row.is_published,featured:row.is_featured,sortOrder:row.sort_order||0,cover:spec.cover_path?{path:spec.cover_path,url:publicUrl(spec.cover_path)}:(spec.cover_url?{path:null,url:spec.cover_url}:null),media:grouped};
+}
+async function loadProjects() {
+ const {data,error}=await sb.from("projects").select("*, project_media(*)").order("sort_order").order("created_at",{ascending:false});
+ if(error)throw error; projects=(data||[]).map(mapProject); renderList();
+}
+function renderList(){
+ $("projectList").innerHTML=projects.map(p=>'<div class="project-row"><span>'+escapeHtml(p.name)+'<br><small>'+(p.published?"Опубликован":"Черновик")+'</small></span><button class="secondary" type="button" data-edit="'+p.id+'">Изменить</button></div>').join("")||"<p>Проектов пока нет.</p>";
+ document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>loadForm(b.dataset.edit));
+}
+function clearForm(){
+ currentId=null;cover=null;media={images:[],threeD:[],plans:[],facades:[]};$("editor").reset();$("id").value="";$("delete").disabled=true;
+ renderThumbs("cover");Object.keys(categories).forEach(renderThumbs);status("editorStatus","Новый проект. Заполните характеристики и сохраните.");
+}
+function renderThumbs(key){
+ const target=$(key==="cover"?"coverPreview":key+"Thumbs"); if(!target)return;
+ const list=key==="cover"?(cover?[cover]:[]):media[key];
+ target.innerHTML=list.map((item,i)=>'<div class="thumb"><img src="'+escapeHtml(item.url||"")+'" alt=""><button type="button" data-remove="'+key+'" data-index="'+i+'">×</button></div>').join("");
+ target.querySelectorAll("[data-remove]").forEach(b=>b.onclick=()=>{const k=b.dataset.remove,idx=Number(b.dataset.index);if(k==="cover")cover=null;else media[k].splice(idx,1);renderThumbs(k);});
+}
+function loadForm(id){
+ const p=projects.find(x=>x.id===id);if(!p)return;currentId=p.id;cover=p.cover?{...p.cover}:null;
+ media=Object.fromEntries(Object.keys(categories).map(k=>[k,[...(p.media[k]||[])].map(x=>({...x}))]));
+ $("id").value=p.id;$("name").value=p.name;$("price").value=p.price;$("totalArea").value=p.totalArea;$("livingArea").value=p.livingArea;$("floors").value=p.floors;$("bedrooms").value=p.bedrooms;$("bathrooms").value=p.bathrooms;$("shortDescription").value=p.shortDescription;$("description").value=p.description;$("published").checked=p.published;$("featured").checked=p.featured;$("delete").disabled=false;
+ renderThumbs("cover");Object.keys(categories).forEach(renderThumbs);status("editorStatus","Редактирование проекта. Сохраните изменения после проверки.");
+}
+async function uploadFile(file,projectId,kind){
+ if(!file.type.startsWith("image/"))throw new Error("Разрешены только изображения.");
+ if(file.size>50*1024*1024)throw new Error("Файл превышает лимит 50 МБ.");
+ const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
+ const path=projectId+"/"+kind+"/"+crypto.randomUUID()+"."+ext;
+ const {error}=await sb.storage.from("project-media").upload(path,file,{contentType:file.type,upsert:false});
+ if(error)throw error;return {path,url:publicUrl(path)};
+}
+async function saveProject(e){
+ e.preventDefault();const saveBtn=$('button[type="submit"]');saveBtn.disabled=true;
+ try{
+  const id=currentId||crypto.randomUUID(),name=$("name").value.trim(),old=projects.find(p=>p.id===id);
+  if(!name)throw new Error("Укажите название проекта.");
+  const specs={...(old?.specifications||{})};
+  let coverPath=cover?.path||null,coverUrl=cover?.path?null:(cover?.url||null);
+  if(cover?.file){const uploaded=await uploadFile(cover.file,id,"cover");coverPath=uploaded.path;coverUrl=null;}
+  if(cover===null){coverPath=null;coverUrl=null;}
+  if(coverPath)specs.cover_path=coverPath;else delete specs.cover_path;
+  if(coverUrl)specs.cover_url=coverUrl;else delete specs.cover_url;
+  const row={id,slug:slugify(name),title:name,short_description:$("shortDescription").value.trim(),description:$("description").value.trim(),total_area:Number($("totalArea").value)||null,living_area:Number($("livingArea").value)||null,price:Number($("price").value)||null,floors:Number($("floors").value)||1,bedrooms:Number($("bedrooms").value)||0,bathrooms:Number($("bathrooms").value)||0,is_published:$("published").checked,is_featured:$("featured").checked,sort_order:old?.sortOrder||0,specifications:specs};
+  const {error:upsertError}=await sb.from("projects").upsert(row);if(upsertError)throw upsertError;
+  const keepPaths=new Set();if(coverPath)keepPaths.add(coverPath);
+  const inserts=[];
+  for(const [category,list] of Object.entries(media)){
+   for(let i=0;i<list.length;i++){
+    let item=list[i];if(item.file)item=await uploadFile(item.file,id,category);
+    if(item.path){keepPaths.add(item.path);if(!item.id)inserts.push({project_id:id,category,storage_path:item.path,title:item.title||null,alt_text:name,sort_order:i});}
+   }
+  }
+  const oldPaths=[...(old?.cover?.path?[old.cover.path]:[]),...Object.values(old?.media||{}).flat().map(x=>x.path).filter(Boolean)];
+  const removed=oldPaths.filter(path=>!keepPaths.has(path));
+  if(removed.length){
+   const {data:oldRows}=await sb.from("project_media").select("id,storage_path").eq("project_id",id);
+   const ids=(oldRows||[]).filter(x=>removed.includes(x.storage_path)).map(x=>x.id);
+   if(ids.length){const {error}=await sb.from("project_media").delete().in("id",ids);if(error)throw error;}
+   const {error}=await sb.storage.from("project-media").remove(removed);if(error)console.warn("Не удалось удалить старые файлы",error);
+  }
+  if(inserts.length){const {error}=await sb.from("project_media").insert(inserts);if(error)throw error;}
+  await loadProjects();loadForm(id);status("editorStatus","Проект сохранён в Supabase. "+(row.is_published?"Он опубликован на сайте.":"Он сохранён как черновик."));
+ }catch(err){console.error(err);status("editorStatus","Ошибка сохранения: "+(err.message||"неизвестная ошибка"),true);}
+ finally{saveBtn.disabled=false;}
+}
+async function deleteProject(){
+ if(!currentId||!confirm("Удалить проект и связанные фотографии?"))return;
+ try{
+  const p=projects.find(x=>x.id===currentId),paths=[...(p?.cover?.path?[p.cover.path]:[]),...Object.values(p?.media||{}).flat().map(x=>x.path).filter(Boolean)];
+  const {error}=await sb.from("projects").delete().eq("id",currentId);if(error)throw error;
+  if(paths.length){const {error:storageError}=await sb.storage.from("project-media").remove(paths);if(storageError)console.warn(storageError);}
+  await loadProjects();clearForm();status("editorStatus","Проект удалён.");
+ }catch(err){status("editorStatus","Ошибка удаления: "+err.message,true);}
+}
+function setupUploads(){
+ $("imageGroups").innerHTML=Object.entries(categories).map(([k,label])=>'<div class="group"><h3>'+label+'</h3><div class="drop" data-drop="'+k+'">Нажмите или перетащите сюда изображения<input type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple hidden></div><div class="thumbs" id="'+k+'Thumbs"></div></div>').join("");
+ document.querySelectorAll("[data-drop]").forEach(el=>{
+  const key=el.dataset.drop,input=el.querySelector("input");
+  el.onclick=e=>{if(e.target!==input)input.click();};input.onchange=()=>addFiles(key,input.files);
+  el.ondragover=e=>{e.preventDefault();el.classList.add("over");};el.ondragleave=()=>el.classList.remove("over");
+  el.ondrop=e=>{e.preventDefault();el.classList.remove("over");addFiles(key,e.dataTransfer.files);};
+ });
+}
+function addFiles(key,fileList){
+ for(const file of [...fileList])if(file.type.startsWith("image/")){
+  const item={file,url:URL.createObjectURL(file),path:null};
+  if(key==="cover")cover=item;else media[key].push(item);
+ }renderThumbs(key);
+}
+async function openWorkspace(){
+ const {data:{user:authUser},error}=await sb.auth.getUser();
+ if(error||!authUser){$("loginPanel").classList.remove("hidden");$("workspace").classList.add("hidden");return;}
+ user=authUser;
+ if(user.app_metadata?.role!=="admin"){await sb.auth.signOut();status("loginStatus","У этой учётной записи нет роли администратора.",true);return;}
+ $("loginPanel").classList.add("hidden");$("workspace").classList.remove("hidden");
+ $("sessionStatus").textContent="Вы вошли как "+user.email+" · роль admin";
+ setupUploads();clearForm();
+ try{await loadProjects();}catch(err){status("sessionStatus","Не удалось загрузить проекты: "+err.message,true);}
+}
+$("loginForm").onsubmit=async e=>{
+ e.preventDefault();status("loginStatus","Выполняется вход…");
+ const {error}=await sb.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});
+ if(error){status("loginStatus","Ошибка входа: "+error.message,true);return;}
+ await openWorkspace();
+};
+$("logout").onclick=async()=>{await sb.auth.signOut();location.reload();};
+$("new").onclick=clearForm;$("clear").onclick=clearForm;$("delete").onclick=deleteProject;$("editor").onsubmit=saveProject;
+$("coverFile")?.addEventListener("change",e=>addFiles("cover",e.target.files));
+setupUploads();sb.auth.onAuthStateChange((_event)=>{setTimeout(openWorkspace,0);});openWorkspace();
 })();
