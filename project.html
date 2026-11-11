@@ -59,7 +59,7 @@ function activeSlideIndex(){
  const g=document.getElementById("gallery");if(!g)return 0;
  const center=g.scrollLeft+g.clientWidth/2;
  let best=0,distance=Infinity;
- [...g.querySelectorAll("figure")].forEach((el,i)=>{const d=Math.abs(el.offsetLeft+el.offsetWidth/2-center);if(d<distance){distance=d;best=i;}});
+ [...g.querySelectorAll("figure")].forEach((el,i)=>{const itemCenter=g.scrollLeft+(el.getBoundingClientRect().left-g.getBoundingClientRect().left)+el.offsetWidth/2;const d=Math.abs(itemCenter-center);if(d<distance){distance=d;best=i;}});
  return best;
 }
 function updateGallery(){
@@ -76,7 +76,7 @@ function goToSlide(index,behavior="smooth"){
  if(!allSlides.length)return;
  slideIndex=Math.max(0,Math.min(index,allSlides.length-1));
  const g=document.getElementById("gallery"),el=g?.querySelectorAll("figure")[slideIndex];
- if(el)g.scrollTo({left:el.offsetLeft-g.offsetLeft,behavior});
+ if(el)g.scrollTo({left:g.scrollLeft+(el.getBoundingClientRect().left-g.getBoundingClientRect().left),behavior});
  updateGallery();
 }
 function openLightbox(index){
@@ -105,7 +105,7 @@ function renderGallery(){
  document.getElementById("galleryNext").onclick=()=>goToSlide(activeSlideIndex()+1);
  gallery.addEventListener("scroll",updateGallery,{passive:true});
  window.addEventListener("resize",updateGallery);
- if(allSlides.length){const first3d=allSlides.findIndex(s=>s.category==="threeD");goToSlide(first3d>=0?first3d:0,"instant");}
+ if(allSlides.length){const first3d=allSlides.findIndex(s=>s.category==="threeD");goToSlide(first3d>=0?first3d:0,"auto");}
  updateGallery();
 }
 (async()=>{try{
