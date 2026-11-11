@@ -106,7 +106,6 @@ async function saveProject(e){
  }catch(err){console.error(err);status("editorStatus","Ошибка сохранения: "+(err.message||"неизвестная ошибка"),true);}
  finally{if(saveBtn)saveBtn.disabled=false;}
 }
-window.houseStroySaveProject = saveProject;
 async function deleteProject(){
  if(!currentId||!confirm("Удалить проект и связанные фотографии?"))return;
  try{
@@ -148,14 +147,15 @@ $("loginForm").onsubmit=async e=>{
  await openWorkspace();
 };
 $("logout").onclick=async()=>{await sb.auth.signOut();location.reload();};
-$("new").onclick=clearForm;$("clear").onclick=clearForm;$("delete").onclick=deleteProject;document.addEventListener("click",e=>{
- const btn=e.target.closest("#saveProjectBtn");
- if(!btn)return;
+$("new").onclick=clearForm;$("clear").onclick=clearForm;$("delete").onclick=deleteProject;
+$("saveProjectBtn").onclick=e=>{
  e.preventDefault();
+ const btn=$("saveProjectBtn");
  if(btn.dataset.busy==="1")return;
  btn.dataset.busy="1";
+ status("editorStatus","Кнопка сохранения нажата. Запускаю сохранение…");
  Promise.resolve(saveProject(e)).finally(()=>{btn.dataset.busy="0";});
-},true);
+};
 $("coverFile")?.addEventListener("change",e=>addFiles("cover",e.target.files));
 setupUploads();sb.auth.onAuthStateChange((_event)=>{setTimeout(openWorkspace,0);});openWorkspace();
 })();
