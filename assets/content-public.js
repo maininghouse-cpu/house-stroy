@@ -34,7 +34,8 @@ async function portfolio(){
  const {data,error}=await sb.from("portfolio_items").select("*").eq("is_published",true).order("sort_order").order("created_at",{ascending:false});if(error||!data)return;
  root.innerHTML=data.map((x,cardIndex)=>{
   const gallery=x.gallery_urls&&x.gallery_urls.length?x.gallery_urls:(x.image_url?[x.image_url]:[]);
-  const images=gallery.map((url,i)=>'<button class="portfolio-photo" type="button" data-card="'+cardIndex+'" data-photo="'+i+'" aria-label="Открыть фото '+(i+1)+' проекта '+esc(x.title)+'"><img src="'+esc(url)+'" alt="'+esc(x.title)+' — фото '+(i+1)+'" loading="lazy"><span class="photo-zoom" aria-hidden="true">⌕</span></button>').join("");
+   const firstPhoto=gallery[0];
+   const images=firstPhoto?'<button class="portfolio-photo" type="button" data-card="'+cardIndex+'" data-photo="0" aria-label="Открыть фотографии проекта '+esc(x.title)+'"><img src="'+esc(firstPhoto)+'" alt="'+esc(x.title)+'" loading="lazy"><span class="photo-zoom" aria-hidden="true">⌕</span></button>':"";
   return '<article class="card">'+(images?'<div class="portfolio-gallery">'+images+'</div>':'')+'<div class="card-body"><h3>'+esc(x.title)+'</h3><p>'+esc(x.description||"")+'</p><div class="meta">'+(x.area?'<span>'+esc(x.area)+' м²</span>':'')+(x.style?'<span>'+esc(x.style)+'</span>':'')+'</div></div></article>';
  }).join("")||"<p>Портфолио скоро пополнится новыми объектами.</p>";
  root.querySelectorAll(".portfolio-photo").forEach(btn=>btn.addEventListener("click",()=>{
