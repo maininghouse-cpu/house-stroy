@@ -83,3 +83,11 @@ footer .brand{color:#171717}
 footer .foot small{color:#686868}
 footer .foot nav{color:#555}
 footer .foot nav a:hover{color:#d71920}
+
+
+/* Official HOUSE STROY logo in header and footer */
+header .brand,footer .brand{display:block;flex:0 0 auto;background-image:url("data:image/webp;base64,<BASE64>");background-repeat:no-repeat;background-position:center;background-size:contain;width:104px;height:102px;overflow:hidden;text-indent:-9999px;font-size:0;line-height:0;white-space:nowrap}
+header .brand{width:104px;height:102px}
+footer .brand{width:82px;height:80px}
+@media(max-width:900px){header .brand{width:88px;height:86px}}
+@media(max-width:560px){header .brand{width:72px;height:70px}footer .brand{width:72px;height:70px}}
