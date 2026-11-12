@@ -2,7 +2,7 @@
 header{padding-left:max(16px,calc((100vw - 1320px)/2));}
 .hero-inner{max-width:760px;margin-left:0;transform:translateX(40px);}
 .hero p{max-width:650px;font-size:19px;line-height:1.75;font-weight:500;}
-.hero-links .btn.outline{background:#171717;color:#fff;border:1px solid #171717;}
+.hero-links .btn.outline{background:#d71920;color:#fff;border:1px solid #d71920;}
 .hero-links .btn.outline:hover{background:#d71920;border-color:#d71920;}
 @media(max-width:900px){
  header{padding-left:20px;}
