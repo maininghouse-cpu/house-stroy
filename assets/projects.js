@@ -16,7 +16,7 @@ async function load(){
 }
 function get(){return cache}
 window.HouseProjects={get,load};
-function card(p){return '<a class="card project-card" href="project.html?id='+encodeURIComponent(p.id)+'"><img src="'+esc(p.cover||"")+'" alt="'+esc(p.name)+'" loading="lazy"><div class="card-body"><h3>'+esc(p.name)+'</h3><p>'+esc(p.description)+'</p><div class="meta"><span>'+p.totalArea+' м² общая · '+p.livingArea+' м² жилая</span><b class="price">'+money(p.price)+'</b></div><div class="project-extra">'+p.floors+' этаж(а) · '+p.bedrooms+' спальни</div></div></a>'}
+function card(p){return '<a class="card project-card" href="project.html?id='+encodeURIComponent(p.id)+'"><img src="'+esc(p.cover||"")+'" alt="'+esc(p.name)+'" loading="lazy"><div class="card-body"><h3>'+esc(p.name)+'</h3><p>'+esc(p.description)+'</p><div class="project-stats"><div class="project-stat"><strong>'+p.totalArea+' м²</strong><span>Общая площадь</span></div><div class="project-stat"><strong>'+p.livingArea+' м²</strong><span>Жилая площадь</span></div><div class="project-stat"><strong>'+p.floors+'</strong><span>Этажность</span></div><div class="project-stat"><strong>'+p.bedrooms+'</strong><span>Спальни</span></div></div><div class="meta"><b class="price">'+money(p.price)+'</b></div></div></a>'}
 function render(){document.querySelectorAll("[data-project-list]").forEach(el=>{el.innerHTML=cache.map(card).join("")||"<p>Опубликованных проектов пока нет.</p>";});}
 function filterSetup(){
  const ids=["areaMin","areaMax","priceMin","priceMax","floorFilter"];if(!document.getElementById("areaMin"))return;
