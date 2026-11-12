@@ -43,9 +43,24 @@ document.querySelector('#callbackForm').addEventListener('submit',e=>{
  e.preventDefault();
  const name=document.querySelector('#callbackName').value.trim();
  const phone=document.querySelector('#callbackPhone').value.trim();
- const subject=encodeURIComponent('Заявка на обратную связь — HOUSE STROY');
- const body=encodeURIComponent('Здравствуйте! Прошу связаться со мной.\\nИмя: '+name+'\\nТелефон: '+phone+'\\nСпособ связи: '+callbackMethod+'\\nСогласие на обработку персональных данных: да');
- document.querySelector('#callbackStatus').textContent='Открываем почтовую программу — проверьте письмо и нажмите «Отправить».';
- window.location.href='mailto:hello@housestroy.ru?subject='+subject+'&body='+body;
+ const submitButton=document.querySelector('.callback-submit');
+ submitButton.disabled=true;
+ submitButton.textContent='Отправляем…';
+ try {
+  const response=await fetch('https://gdzklvlyoyzokhzldnte.supabase.co/functions/v1/send-callback-request',{
+   method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({name,phone,method:callbackMethod,consent:true,website:''})
+  });
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok) throw new Error(result.error||'Не удалось отправить заявку');
+  document.querySelector('#callbackStatus').textContent='Заявка отправлена! Мы свяжемся с вами в рабочее время.';
+  document.querySelector('#callbackForm').reset();
+ } catch(error) {
+  document.querySelector('#callbackStatus').textContent=error.message||'Ошибка отправки. Попробуйте ещё раз или позвоните нам.';
+ } finally {
+  submitButton.disabled=false;
+  submitButton.innerHTML='Отправить заявку <span aria-hidden="true">↗</span>';
+ }
 });
 })();
