@@ -103,3 +103,22 @@ footer .brand b{color:#d71920}
 @media(max-width:600px){.hero .eyebrow{font-size:12px;letter-spacing:.14em}}
 
 .portfolio-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;overflow:hidden;border-radius:12px}.portfolio-gallery img{width:100%;height:190px;object-fit:cover;border-radius:8px}.portfolio-gallery img:only-child{grid-column:1/-1;height:280px}@media(max-width:600px){.portfolio-gallery img{height:130px}}
+
+/* Portfolio image viewer */
+.portfolio-gallery{align-items:stretch}
+.portfolio-photo{position:relative;display:block;width:100%;padding:0;border:0;background:#111;cursor:zoom-in;overflow:hidden;border-radius:8px}
+.portfolio-photo img{display:block;width:100%;height:190px;object-fit:cover;transition:transform .25s ease,opacity .25s ease}
+.portfolio-photo:hover img{transform:scale(1.045);opacity:.88}
+.photo-zoom{position:absolute;right:10px;bottom:9px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.62);color:#fff;font-size:22px;line-height:1}
+.portfolio-lightbox[hidden]{display:none}
+.portfolio-lightbox{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.94);display:flex;align-items:center;justify-content:center;padding:64px 76px 42px}
+.portfolio-lightbox figure{margin:0;max-width:min(100%,1200px);max-height:100%;display:flex;flex-direction:column;align-items:center;gap:12px}
+.portfolio-lightbox figure img{display:block;max-width:100%;max-height:calc(100vh - 145px);width:auto;height:auto;object-fit:contain}
+.portfolio-lightbox figcaption{color:#fff;font-size:14px;text-align:center}
+.lightbox-close,.lightbox-arrow{position:absolute;border:0;color:#fff;background:rgba(255,255,255,.14);cursor:pointer;display:grid;place-items:center}
+.lightbox-close{top:18px;right:22px;width:44px;height:44px;border-radius:50%;font-size:32px}
+.lightbox-arrow{top:50%;transform:translateY(-50%);width:48px;height:64px;border-radius:10px;font-size:48px;line-height:1}
+.lightbox-prev{left:18px}.lightbox-next{right:18px}
+.lightbox-close:hover,.lightbox-arrow:hover{background:rgba(255,255,255,.28)}
+body.lightbox-open{overflow:hidden}
+@media(max-width:600px){.portfolio-photo img{height:130px}.portfolio-lightbox{padding:58px 12px 28px}.portfolio-lightbox figure img{max-height:calc(100vh - 125px)}.lightbox-arrow{width:38px;height:52px;font-size:38px}.lightbox-prev{left:7px}.lightbox-next{right:7px}.lightbox-close{right:10px;top:10px}}
