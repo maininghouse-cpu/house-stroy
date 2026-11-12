@@ -49,7 +49,7 @@ function renderPortfolioPhotos(){
   files.map((file,i)=>'<div class="thumb"><img src="'+URL.createObjectURL(file)+'" alt="Новое фото"><button type="button" data-remove-new="'+i+'" aria-label="Убрать новое фото '+(i+1)+'">×</button></div>').join("");
  preview.innerHTML='<div class="thumbs">'+thumbs+'</div><small>'+count+' из 15 фотографий</small>';
  preview.querySelectorAll("[data-remove-photo]").forEach(btn=>btn.addEventListener("click",()=>{
-  const arr=JSON.parse(input.dataset.galleryUrls||"[]");arr.splice(Number(btn.dataset.removePhoto),1);input.dataset.galleryUrls=JSON.stringify(arr);renderPortfolioPhotos();
+  const arr=JSON.parse(input.dataset.galleryUrls||"[]");arr.splice(Number(btn.dataset.removePhoto),1);input.dataset.galleryUrls=JSON.stringify(arr);if(!arr.length&&input.dataset.originalGalleryUrls==="[]")$("portfolioImage").value="";renderPortfolioPhotos();
  }));
  preview.querySelectorAll("[data-remove-new]").forEach(btn=>btn.addEventListener("click",()=>{
   const dt=new DataTransfer(),remove=Number(btn.dataset.removeNew);
