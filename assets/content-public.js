@@ -5,7 +5,7 @@ let viewer=null,activeImages=[],activeIndex=0,touchStartX=0;
 function ensureViewer(){
  if(viewer)return viewer;
  viewer=document.createElement("div");viewer.className="portfolio-lightbox";viewer.hidden=true;viewer.setAttribute("role","dialog");viewer.setAttribute("aria-modal","true");viewer.setAttribute("aria-label","Просмотр фотографий");
- viewer.innerHTML='<button class="lightbox-close" type="button" aria-label="Закрыть">×</button><button class="lightbox-arrow lightbox-prev" type="button" aria-label="Предыдущее фото">‹</button><figure><img alt=""><figcaption></figcaption></figure><button class="lightbox-arrow lightbox-next" type="button" aria-label="Следующее фото">›</button>';
+ viewer.innerHTML='<button class="lightbox-close" type="button" aria-label="Закрыть">×</button><button class="lightbox-arrow lightbox-prev" type="button" aria-label="Предыдущее фото">‹</button><figure><img alt=""><figcaption></figcaption><div class="lightbox-thumbnails" aria-label="Миниатюры фотографий"></div></figure><button class="lightbox-arrow lightbox-next" type="button" aria-label="Следующее фото">›</button>';
  document.body.appendChild(viewer);
  viewer.querySelector(".lightbox-close").addEventListener("click",closeViewer);
  viewer.querySelector(".lightbox-prev").addEventListener("click",()=>showImage(activeIndex-1));
@@ -22,10 +22,10 @@ function showImage(index){
  const item=activeImages[activeIndex],v=ensureViewer();
  v.querySelector("figure img").src=item.url;v.querySelector("figure img").alt=item.title+" — фото "+(activeIndex+1);
  v.querySelector("figcaption").textContent=item.title+" · "+(activeIndex+1)+" / "+activeImages.length;
- v.querySelector(".lightbox-prev").hidden=activeImages.length<2;v.querySelector(".lightbox-next").hidden=activeImages.length<2;
+ v.querySelector(".lightbox-prev").hidden=activeImages.length<2;v.querySelector(".lightbox-next").hidden=activeImages.length<2;\n v.querySelectorAll(".lightbox-thumb").forEach((thumb,i)=>{thumb.classList.toggle("is-active",i===activeIndex);thumb.setAttribute("aria-current",i===activeIndex?"true":"false");if(i===activeIndex)thumb.scrollIntoView({block:"nearest",inline:"nearest"});});
 }
 function openViewer(images,index){
- activeImages=images;ensureViewer().hidden=false;document.body.classList.add("lightbox-open");showImage(index);
+ activeImages=images;const v=ensureViewer();const strip=v.querySelector(".lightbox-thumbnails");strip.innerHTML="";images.forEach((item,i)=>{const thumb=document.createElement("button");thumb.type="button";thumb.className="lightbox-thumb";thumb.setAttribute("aria-label","Показать фото "+(i+1));thumb.innerHTML="<img alt=\"\" loading=\"lazy\">";thumb.querySelector("img").src=item.url;thumb.addEventListener("click",()=>showImage(i));strip.appendChild(thumb);});v.hidden=false;document.body.classList.add("lightbox-open");showImage(index);
  viewer.querySelector(".lightbox-close").focus();
 }
 function closeViewer(){if(!viewer)return;viewer.hidden=true;document.body.classList.remove("lightbox-open");}
