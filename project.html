@@ -66,8 +66,8 @@
 <script>
 const params=new URLSearchParams(location.search),root=document.getElementById("content");
 let allSlides=[],lightboxSlides=[],slideIndex=0,project;
-const categoryOrder=["threeD","plans","facades","images"];
-const categoryNames={threeD:"3D",plans:"Планы",facades:"Фасады",images:"Фотографии"};
+const categoryOrder=["threeD","plans","facades","photos","images"];
+const categoryNames={threeD:"3D",plans:"Планы",facades:"Фасады",photos:"Фотографии",images:"Фотографии"};
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function activeSlideIndex(){
  const g=document.getElementById("gallery");if(!g)return 0;
@@ -150,7 +150,7 @@ function renderGallery(){
  project=all[index];
  const prev=all[index-1],next=all[index+1];
  root.innerHTML='<div class="detail-hero"><img id="cover" src="'+esc(project.cover)+'" alt="'+esc(project.name)+'"><div><div class="eyebrow">HOUSE STROY / ПРОЕКТ</div><h1>'+esc(project.name)+'</h1><p>'+esc(project.description)+'</p><h2>'+Number(project.price||0).toLocaleString("ru-RU")+' ₽</h2><div class="specs"><div class="spec"><b>'+project.totalArea+' м²</b><br>Общая площадь</div><div class="spec"><b>'+project.livingArea+' м²</b><br>Жилая площадь</div><div class="spec"><b>'+project.floors+'</b><br>Этажность</div><div class="spec"><b>'+project.bedrooms+'</b><br>Спальни</div></div></div></div>'+
- '<div class="tabs"><button data-tab="threeD">3D</button><button data-tab="plans">Планы</button><button data-tab="facades">Фасады</button><button data-tab="images">Фотографии</button></div>'+
+ '<div class="tabs"><button data-tab="threeD">3D</button><button data-tab="plans">Планы</button><button data-tab="facades">Фасады</button><button data-tab="photos">Фотографии</button></div>'+
  '<div class="gallery-wrap"><div class="gallery" id="gallery"></div><div class="thumb-strip" id="thumbStrip" aria-label="Миниатюры всех изображений"></div><div class="gallery-controls" id="galleryControls"><button id="galleryPrev" type="button" aria-label="Предыдущее изображение">← Назад</button><span class="gallery-count" id="galleryCount"></span><button id="galleryNext" type="button" aria-label="Следующее изображение">Вперёд →</button></div></div>'+
  '<nav class="project-nav" aria-label="Навигация по проектам">'+(prev?'<a href="project.html?id='+encodeURIComponent(prev.id)+'"><small>← Предыдущий проект</small><strong>'+esc(prev.name)+'</strong></a>':'<span></span>')+(next?'<a href="project.html?id='+encodeURIComponent(next.id)+'"><small>Следующий проект →</small><strong>'+esc(next.name)+'</strong></a>':'<span></span>')+'</nav>';
  document.getElementById("cover").onclick=()=>{if(project.cover)openLightbox(0,[{src:project.cover,category:"cover"},...allSlides.filter(s=>s.src!==project.cover)]);};
