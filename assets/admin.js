@@ -55,7 +55,7 @@ async function compressImage(file){
   return new File([blob],base+".webp",{type:"image/webp",lastModified:Date.now()});
  }finally{bitmap.close?.();}
 }
-async function uploadFile(file,projectId,kind){
+async function uploadFile(file,projectId,kind,sortOrder=0){
  const optimized=await compressImage(file);
  const form=new FormData();
  form.append("file",optimized,optimized.name);
@@ -63,37 +63,51 @@ async function uploadFile(file,projectId,kind){
  form.append("category",kind);
  form.append("title",optimized.name);
  form.append("alt_text",optimized.name);
+ form.append("sort_order",String(sortOrder));
  const {data,error}=await sb.functions.invoke("admin-upload-project-media",{body:form});
- if(error)throw new Error("Ошибка серверной загрузки: "+(error.message||String(error)));
+ if(error){
+  let detail="";
+  try{const body=await error.context?.json();detail=body?.error||body?.message||"";}catch{}
+  throw new Error("Ошибка серверной загрузки"+(detail?": "+detail:": "+(error.message||String(error))));
+ }
  if(!data?.ok)throw new Error(data?.error||"Сервер не подтвердил загрузку.");
  const path=kind==="cover"?data.cover_path:data.media?.storage_path;
  if(!path)throw new Error("Сервер не вернул путь загруженного файла.");
- return {path,url:publicUrl(path),optimizedBytes:optimized.size,originalBytes:file.size};
+ return {path,url:publicUrl(path),id:data.media?.id||null,title:data.media?.title||optimized.name,optimizedBytes:optimized.size,originalBytes:file.size};
 }
 async function saveProject(e){
  e?.preventDefault();
- status("editorStatus","Нажатие зарегистрировано. Начинаю сохранение…");
- const saveBtn=$("saveProjectBtn");if(saveBtn)saveBtn.disabled=true;
  status("editorStatus","Сохраняю проект и фотографии…");
+ const saveBtn=$("saveProjectBtn");if(saveBtn)saveBtn.disabled=true;
  try{
   const id=currentId||crypto.randomUUID(),name=$("name").value.trim(),old=projects.find(p=>p.id===id);
   if(!name){$("name").focus();throw new Error("Сначала укажите название проекта.");}
   const specs={...(old?.specifications||{})};
   let coverPath=cover?.path||null,coverUrl=cover?.path?null:(cover?.url||null);
-  if(cover?.file){const uploaded=await uploadFile(cover.file,id,"cover");coverPath=uploaded.path;coverUrl=null;}
   if(cover===null){coverPath=null;coverUrl=null;}
   if(coverPath)specs.cover_path=coverPath;else delete specs.cover_path;
   if(coverUrl)specs.cover_url=coverUrl;else delete specs.cover_url;
   const row={id,slug:slugify(name)+"-"+id.slice(0,8),title:name,short_description:$("shortDescription").value.trim(),description:$("description").value.trim(),total_area:Number($("totalArea").value)||null,living_area:Number($("livingArea").value)||null,price:Number($("price").value)||null,floors:Number($("floors").value)||1,bedrooms:Number($("bedrooms").value)||0,bathrooms:Number($("bathrooms").value)||0,is_published:$("published").checked,is_featured:$("featured").checked,sort_order:old?.sortOrder||0,specifications:specs};
   const {error:upsertError}=await sb.from("projects").upsert(row);if(upsertError)throw upsertError;
-  const keepPaths=new Set();if(coverPath)keepPaths.add(coverPath);
+  const keepPaths=new Set();
+  if(cover?.file){const uploaded=await uploadFile(cover.file,id,"cover");coverPath=uploaded.path;coverUrl=null;keepPaths.add(coverPath);}
+  else if(coverPath)keepPaths.add(coverPath);
   const inserts=[];
   for(const [category,list] of Object.entries(media)){
    for(let i=0;i<list.length;i++){
-    let item=list[i];if(item.file)item=await uploadFile(item.file,id,category);
-    if(item.path){keepPaths.add(item.path);if(!item.id)inserts.push({project_id:id,category,storage_path:item.path,title:item.title||null,alt_text:name,sort_order:i});}
+    let item=list[i];
+    if(item.file)item=await uploadFile(item.file,id,category,i);
+    if(item.path){
+     keepPaths.add(item.path);
+     if(item.id){const {error}=await sb.from("project_media").update({sort_order:i}).eq("id",item.id);if(error)throw error;}
+    }
    }
   }
+  const finalSpecs={...(row.specifications||{})};
+  if(coverPath)finalSpecs.cover_path=coverPath;else delete finalSpecs.cover_path;
+  if(coverUrl)finalSpecs.cover_url=coverUrl;else delete finalSpecs.cover_url;
+  const {error:coverUpdateError}=await sb.from("projects").update({specifications:finalSpecs}).eq("id",id);
+  if(coverUpdateError)throw coverUpdateError;
   const oldPaths=[...(old?.cover?.path?[old.cover.path]:[]),...Object.values(old?.media||{}).flat().map(x=>x.path).filter(Boolean)];
   const removed=oldPaths.filter(path=>!keepPaths.has(path));
   if(removed.length){
@@ -101,13 +115,6 @@ async function saveProject(e){
    const ids=(oldRows||[]).filter(x=>removed.includes(x.storage_path)).map(x=>x.id);
    if(ids.length){const {error}=await sb.from("project_media").delete().in("id",ids);if(error)throw error;}
    const {error}=await sb.storage.from("project-media").remove(removed);if(error)console.warn("Не удалось удалить старые файлы",error);
-  }
-  if(inserts.length){const {error}=await sb.from("project_media").insert(inserts);if(error)throw error;}
-  for(const [category,list] of Object.entries(media)){
-   for(let i=0;i<list.length;i++){
-    const item=list[i];
-    if(item.id){const {error}=await sb.from("project_media").update({sort_order:i}).eq("id",item.id);if(error)throw error;}
-   }
   }
   await loadProjects();loadForm(id);status("editorStatus","Проект сохранён в Supabase. "+(row.is_published?"Он опубликован на сайте.":"Он сохранён как черновик."));
  }catch(err){console.error(err);status("editorStatus","Ошибка сохранения: "+(err.message||"неизвестная ошибка"),true);}
