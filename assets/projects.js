@@ -6,7 +6,7 @@ function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&l
 function money(n){return Number(n||0).toLocaleString("ru-RU")+" ₽"}
 function url(path){return path?sb.storage.from("project-media").getPublicUrl(path).data.publicUrl:""}
 function mapRow(row){
- const spec=row.specifications||{},media={images:[],threeD:[],plans:[],facades:[]};
+ const spec=row.specifications||{},media={images:[],threeD:[],plans:[],facades:[],photos:[]};
  (row.project_media||[]).sort((a,b)=>a.sort_order-b.sort_order).forEach(m=>{if(media[m.category])media[m.category].push(url(m.storage_path));});
  return {id:row.id,slug:row.slug,name:row.title,description:row.description||row.short_description||"",price:row.price||0,totalArea:row.total_area||0,livingArea:row.living_area||0,floors:row.floors||1,bedrooms:row.bedrooms||0,bathrooms:row.bathrooms||0,cover:spec.cover_path?url(spec.cover_path):(spec.cover_url||""),...media};
 }
