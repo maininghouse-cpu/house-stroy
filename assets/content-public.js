@@ -1,14 +1,46 @@
 (() => {
 const sb=window.houseStroyClient;if(!sb)return;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let viewer=null,activeImages=[],activeIndex=0,touchStartX=0;
+function ensureViewer(){
+ if(viewer)return viewer;
+ viewer=document.createElement("div");viewer.className="portfolio-lightbox";viewer.hidden=true;viewer.setAttribute("role","dialog");viewer.setAttribute("aria-modal","true");viewer.setAttribute("aria-label","Просмотр фотографий");
+ viewer.innerHTML='<button class="lightbox-close" type="button" aria-label="Закрыть">×</button><button class="lightbox-arrow lightbox-prev" type="button" aria-label="Предыдущее фото">‹</button><figure><img alt=""><figcaption></figcaption></figure><button class="lightbox-arrow lightbox-next" type="button" aria-label="Следующее фото">›</button>';
+ document.body.appendChild(viewer);
+ viewer.querySelector(".lightbox-close").addEventListener("click",closeViewer);
+ viewer.querySelector(".lightbox-prev").addEventListener("click",()=>showImage(activeIndex-1));
+ viewer.querySelector(".lightbox-next").addEventListener("click",()=>showImage(activeIndex+1));
+ viewer.addEventListener("click",e=>{if(e.target===viewer)closeViewer();});
+ viewer.addEventListener("touchstart",e=>{touchStartX=e.changedTouches[0].clientX;},{passive:true});
+ viewer.addEventListener("touchend",e=>{const dx=e.changedTouches[0].clientX-touchStartX;if(Math.abs(dx)>45)showImage(activeIndex+(dx<0?1:-1));},{passive:true});
+ document.addEventListener("keydown",e=>{if(viewer.hidden)return;if(e.key==="Escape")closeViewer();if(e.key==="ArrowRight")showImage(activeIndex+1);if(e.key==="ArrowLeft")showImage(activeIndex-1);});
+ return viewer;
+}
+function showImage(index){
+ if(!activeImages.length)return;
+ activeIndex=(index+activeImages.length)%activeImages.length;
+ const item=activeImages[activeIndex],v=ensureViewer();
+ v.querySelector("figure img").src=item.url;v.querySelector("figure img").alt=item.title+" — фото "+(activeIndex+1);
+ v.querySelector("figcaption").textContent=item.title+" · "+(activeIndex+1)+" / "+activeImages.length;
+ v.querySelector(".lightbox-prev").hidden=activeImages.length<2;v.querySelector(".lightbox-next").hidden=activeImages.length<2;
+}
+function openViewer(images,index){
+ activeImages=images;ensureViewer().hidden=false;document.body.classList.add("lightbox-open");showImage(index);
+ viewer.querySelector(".lightbox-close").focus();
+}
+function closeViewer(){if(!viewer)return;viewer.hidden=true;document.body.classList.remove("lightbox-open");}
 async function portfolio(){
  const root=document.querySelector("[data-portfolio-list]");if(!root)return;
  const {data,error}=await sb.from("portfolio_items").select("*").eq("is_published",true).order("sort_order").order("created_at",{ascending:false});if(error||!data)return;
- root.innerHTML=data.map(x=>{
+ root.innerHTML=data.map((x,cardIndex)=>{
   const gallery=x.gallery_urls&&x.gallery_urls.length?x.gallery_urls:(x.image_url?[x.image_url]:[]);
-  const images=gallery.map((url,i)=>'<img src="'+esc(url)+'" alt="'+esc(x.title)+' — фото '+(i+1)+'" loading="lazy">').join("");
+  const images=gallery.map((url,i)=>'<button class="portfolio-photo" type="button" data-card="'+cardIndex+'" data-photo="'+i+'" aria-label="Открыть фото '+(i+1)+' проекта '+esc(x.title)+'"><img src="'+esc(url)+'" alt="'+esc(x.title)+' — фото '+(i+1)+'" loading="lazy"><span class="photo-zoom" aria-hidden="true">⌕</span></button>').join("");
   return '<article class="card">'+(images?'<div class="portfolio-gallery">'+images+'</div>':'')+'<div class="card-body"><h3>'+esc(x.title)+'</h3><p>'+esc(x.description||"")+'</p><div class="meta">'+(x.area?'<span>'+esc(x.area)+' м²</span>':'')+(x.style?'<span>'+esc(x.style)+'</span>':'')+'</div></div></article>';
  }).join("")||"<p>Портфолио скоро пополнится новыми объектами.</p>";
+ root.querySelectorAll(".portfolio-photo").forEach(btn=>btn.addEventListener("click",()=>{
+  const x=data[Number(btn.dataset.card)],urls=x.gallery_urls&&x.gallery_urls.length?x.gallery_urls:(x.image_url?[x.image_url]:[]);
+  openViewer(urls.map((url)=>({url,title:x.title})),Number(btn.dataset.photo));
+ }));
 }
 async function reviews(){
  const root=document.querySelector("[data-reviews-list]");if(!root)return;
