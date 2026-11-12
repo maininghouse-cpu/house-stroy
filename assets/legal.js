@@ -6,7 +6,7 @@
   const operator='[Укажите полное наименование оператора / ФИО ИП]';
   const email='[Укажите рабочий email для обращений по персональным данным]';
   const style=`
-  #hs-cookie{position:fixed;left:0;right:0;bottom:0;z-index:10000;background:#171717;color:#fff;padding:17px 22px;box-shadow:0 -8px 30px #0003;display:flex;gap:20px;align-items:center;justify-content:center;font:13px/1.55 Inter,Arial,sans-serif}
+  #hs-cookie[hidden]{display:none!important}#hs-cookie{position:fixed;left:0;right:0;bottom:0;z-index:10000;background:#171717;color:#fff;padding:17px 22px;box-shadow:0 -8px 30px #0003;display:flex;gap:20px;align-items:center;justify-content:center;font:13px/1.55 Inter,Arial,sans-serif}
   #hs-cookie p{max-width:850px;margin:0;color:#eee}#hs-cookie button{border:0;border-radius:4px;padding:12px 24px;background:#d71920;color:#fff;font-weight:700;cursor:pointer;white-space:nowrap}
   #hs-cookie a,#hs-legal a{color:#e04449;text-decoration:underline;cursor:pointer}
   #hs-legal{position:fixed;inset:0;z-index:10001;background:#000a;display:none;align-items:center;justify-content:center;padding:20px}
