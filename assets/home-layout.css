@@ -1,12 +1,12 @@
 /* Homepage alignment and hero CTA refinements — 2026-11-12 */
 header{padding-left:max(16px,calc((100vw - 1320px)/2));}
-.hero-inner{max-width:760px;margin-left:0;transform:translateX(-34px);}
+.hero-inner{max-width:760px;margin-left:0;transform:translateX(0);}
 .hero p{max-width:650px;font-size:19px;line-height:1.75;font-weight:500;}
 .hero-links .btn.outline{background:#171717;color:#fff;border:1px solid #171717;}
 .hero-links .btn.outline:hover{background:#d71920;border-color:#d71920;}
 @media(max-width:900px){
  header{padding-left:20px;}
- .hero-inner{transform:translateX(-10px);}
+ .hero-inner{transform:none;}
  .hero p{font-size:17px;}
 }
 @media(max-width:560px){
