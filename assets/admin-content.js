@@ -7,7 +7,7 @@ async function uploadPhotos(id){
  const input=$("portfolioPhoto"),files=Array.from(input.files||[]);
  let retained=[];try{retained=JSON.parse(input.dataset.galleryUrls||"[]");}catch{}
  if(retained.length+files.length>15)throw new Error("Можно сохранить не более 15 фотографий объекта.");
- if(!files.length)return retained.length?retained:($("portfolioImage").value.trim()?[$("portfolioImage").value.trim()]:[]);
+ if(!files.length)return Object.prototype.hasOwnProperty.call(input.dataset,"galleryUrls")?retained:($("portfolioImage").value.trim()?[$("portfolioImage").value.trim()]:[]);
  const urls=[];
  for(let i=0;i<files.length;i++){
   const file=files[i];
@@ -28,7 +28,6 @@ async function loadPortfolio(){
   const edit=document.querySelector('[data-pedit="'+x.id+'"]');if(edit)edit.onclick=()=>{
    $("portfolioId").value=x.id;$("portfolioTitle").value=x.title;$("portfolioDescription").value=x.description||"";$("portfolioImage").value=x.image_url||"";$("portfolioPhoto").value="";
    const gallery=x.gallery_urls&&x.gallery_urls.length?x.gallery_urls:(x.image_url?[x.image_url]:[]);$("portfolioPhoto").dataset.galleryUrls=JSON.stringify(gallery);$("portfolioPhoto").dataset.originalGalleryUrls=JSON.stringify(gallery);renderPortfolioPhotos();
-   $("portfolioPhotoPreview").innerHTML=gallery.map(url=>'<img src="'+esc(url)+'" alt="" style="max-width:110px;max-height:80px;object-fit:cover;border-radius:8px;margin:3px">').join("")||"Фото ещё не добавлено";
    $("portfolioArea").value=x.area??"";$("portfolioStyle").value=x.style||"";$("portfolioPublished").checked=x.is_published;$("portfolioOrder").value=x.sort_order||0;say("portfolioStatus","Редактирование: "+x.title);
   };
   const del=document.querySelector('[data-pdelete="'+x.id+'"]');if(del)del.onclick=async()=>{if(!confirm("Удалить объект портфолио «"+x.title+"»?"))return;const {error}=await sb.from("portfolio_items").delete().eq("id",x.id);if(error){say("portfolioStatus","Ошибка удаления: "+error.message,true);return;}await loadPortfolio();say("portfolioStatus","Объект удалён.");};
@@ -43,12 +42,20 @@ async function loadReviews(){
  });
 }
 function renderPortfolioPhotos(){
-  const input=$("portfolioPhoto");
-  let kept=[];try{kept=JSON.parse(input.dataset.galleryUrls||"[]");}catch{}
-  const files=Array.from(input.files||[]),count=kept.length+files.length;
-  const thumbs=kept.map((url,i)=>'<div class="thumb"><img src="'+esc(url)+'" alt="Фото '+(i+1)+'"><button type="button" data-remove-photo="'+i+'" aria-label="Удалить фото '+(i+1)+'">×</button></div>').join("")+
-   files.map((file,i)=>'<div class="thumb"><img src="'+URL.createObjectURL(file)+'" alt="Новое фото"><button type="button" data-remove-new="'+i+'" aria-label="Убрать новое фото">×</button></div>').join("");
-  $("portfolioPhotoPreview").innerHTML='<div class="thumbs">'+thumbs+'</div><small>'+count+' из 15 фотографий</small>';
+ const input=$("portfolioPhoto"),preview=$("portfolioPhotoPreview");
+ let kept=[];try{kept=JSON.parse(input.dataset.galleryUrls||"[]");}catch{}
+ const files=Array.from(input.files||[]),count=kept.length+files.length;
+ const thumbs=kept.map((url,i)=>'<div class="thumb"><img src="'+esc(url)+'" alt="Фото '+(i+1)+'"><button type="button" data-remove-photo="'+i+'" aria-label="Удалить сохранённое фото '+(i+1)+'">×</button></div>').join("")+
+  files.map((file,i)=>'<div class="thumb"><img src="'+URL.createObjectURL(file)+'" alt="Новое фото"><button type="button" data-remove-new="'+i+'" aria-label="Убрать новое фото '+(i+1)+'">×</button></div>').join("");
+ preview.innerHTML='<div class="thumbs">'+thumbs+'</div><small>'+count+' из 15 фотографий</small>';
+ preview.querySelectorAll("[data-remove-photo]").forEach(btn=>btn.addEventListener("click",()=>{
+  const arr=JSON.parse(input.dataset.galleryUrls||"[]");arr.splice(Number(btn.dataset.removePhoto),1);input.dataset.galleryUrls=JSON.stringify(arr);renderPortfolioPhotos();
+ }));
+ preview.querySelectorAll("[data-remove-new]").forEach(btn=>btn.addEventListener("click",()=>{
+  const dt=new DataTransfer(),remove=Number(btn.dataset.removeNew);
+  Array.from(input.files||[]).forEach((file,i)=>{if(i!==remove)dt.items.add(file);});
+  input.files=dt.files;renderPortfolioPhotos();
+ }));
 }
 async function deleteRemovedStoragePhotos(oldUrls,newUrls){
  const prefix="/storage/v1/object/public/portfolio-media/";
@@ -71,12 +78,7 @@ $("reviewsAdminForm").addEventListener("submit",async e=>{
  try{const {error}=await sb.from("reviews").upsert(row);if(error)throw error;await loadReviews();clearReview();say("reviewStatus","Изменения отзывов сохранены.");}catch(err){say("reviewStatus","Ошибка сохранения: "+err.message,true);}finally{btn.disabled=false;}
 });
 $("portfolioPhoto").addEventListener("change",renderPortfolioPhotos);
- $("portfolioPhotoPreview").addEventListener("click",e=>{
-  const saved=e.target.closest("[data-remove-photo]");
-  if(saved){e.preventDefault();e.stopPropagation();const input=$("portfolioPhoto");let arr=[];try{arr=JSON.parse(input.dataset.galleryUrls||"[]");}catch{}arr.splice(Number(saved.dataset.removePhoto),1);input.dataset.galleryUrls=JSON.stringify(arr);renderPortfolioPhotos();return;}
-  const fresh=e.target.closest("[data-remove-new]");
-  if(fresh){e.preventDefault();e.stopPropagation();const input=$("portfolioPhoto"),dt=new DataTransfer(),remove=Number(fresh.dataset.removeNew);Array.from(input.files||[]).forEach((file,i)=>{if(i!==remove)dt.items.add(file);});input.files=dt.files;renderPortfolioPhotos();}
- });
+;
 $("portfolioClear").onclick=clearPortfolio;$("reviewClear").onclick=clearReview;
 async function init(){const {data:{user},error}=await sb.auth.getUser();if(error||!user||user.app_metadata?.role!=="admin")return;try{await Promise.all([loadPortfolio(),loadReviews()]);}catch(err){say("portfolioStatus","Не удалось загрузить портфолио: "+err.message,true);say("reviewStatus","Не удалось загрузить отзывы: "+err.message,true);}}
 sb.auth.onAuthStateChange(()=>{setTimeout(init,0);});init();
