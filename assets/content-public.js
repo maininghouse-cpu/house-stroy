@@ -22,7 +22,8 @@ function showImage(index){
  const item=activeImages[activeIndex],v=ensureViewer();
  v.querySelector("figure img").src=item.url;v.querySelector("figure img").alt=item.title+" — фото "+(activeIndex+1);
  v.querySelector("figcaption").textContent=item.title+" · "+(activeIndex+1)+" / "+activeImages.length;
- v.querySelector(".lightbox-prev").hidden=activeImages.length<2;v.querySelector(".lightbox-next").hidden=activeImages.length<2;\n v.querySelectorAll(".lightbox-thumb").forEach((thumb,i)=>{thumb.classList.toggle("is-active",i===activeIndex);thumb.setAttribute("aria-current",i===activeIndex?"true":"false");if(i===activeIndex)thumb.scrollIntoView({block:"nearest",inline:"nearest"});});
+ v.querySelector(".lightbox-prev").hidden=activeImages.length<2;v.querySelector(".lightbox-next").hidden=activeImages.length<2;
+ v.querySelectorAll(".lightbox-thumb").forEach((thumb,i)=>{thumb.classList.toggle("is-active",i===activeIndex);thumb.setAttribute("aria-current",i===activeIndex?"true":"false");if(i===activeIndex)thumb.scrollIntoView({block:"nearest",inline:"nearest"});});
 }
 function openViewer(images,index){
  activeImages=images;const v=ensureViewer();const strip=v.querySelector(".lightbox-thumbnails");strip.innerHTML="";images.forEach((item,i)=>{const thumb=document.createElement("button");thumb.type="button";thumb.className="lightbox-thumb";thumb.setAttribute("aria-label","Показать фото "+(i+1));thumb.innerHTML="<img alt=\"\" loading=\"lazy\">";thumb.querySelector("img").src=item.url;thumb.addEventListener("click",()=>showImage(i));strip.appendChild(thumb);});v.hidden=false;document.body.classList.add("lightbox-open");showImage(index);
@@ -31,7 +32,7 @@ function openViewer(images,index){
 function closeViewer(){if(!viewer)return;viewer.hidden=true;document.body.classList.remove("lightbox-open");}
 async function portfolio(){
  const root=document.querySelector("[data-portfolio-list]");if(!root)return;
- const {data,error}=await sb.from("portfolio_items").select("*").eq("is_published",true).order("sort_order").order("created_at",{ascending:false});if(error||!data)return;
+ const {data,error}=await sb.from("portfolio_items").select("*").eq("is_published",true).order("sort_order",{ascending:true}).order("created_at",{ascending:false});if(error){console.error("Не удалось загрузить портфолио:",error);root.innerHTML="<p>Не удалось загрузить проекты портфолио. Обновите страницу позже.</p>";return;}
  root.innerHTML=data.map((x,cardIndex)=>{
   const gallery=x.gallery_urls&&x.gallery_urls.length?x.gallery_urls:(x.image_url?[x.image_url]:[]);
    const firstPhoto=gallery[0];
