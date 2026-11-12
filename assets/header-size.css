@@ -1,0 +1,27 @@
+/* Header and navigation sizing update — 2026-11-12 */
+header{height:116px;gap:30px}
+.brand{font-size:28px}
+.nav{gap:28px;font-size:16px}
+.nav a{display:inline-flex;align-items:center;min-height:46px;padding:8px 3px}
+.head-actions{gap:20px}
+.tel{font-size:15px;line-height:1.65}
+.theme{font-size:14px;padding:14px 18px}
+.btn{font-size:14px;padding:17px 26px}
+.hero-links{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn.outline{margin-left:0}
+@media(max-width:900px){
+ header{height:auto;min-height:100px;padding:16px 20px;gap:16px}
+ .brand{font-size:25px}
+ .nav{gap:24px;font-size:15px;padding:7px 0 10px}
+ .nav a{min-height:42px}
+ .head-actions{gap:14px}
+ .theme{font-size:13px;padding:12px 15px}
+}
+@media(max-width:560px){
+ header{padding:13px 16px;gap:12px}
+ .brand{font-size:20px}
+ .nav{gap:20px;font-size:14px}
+ .nav a{min-height:40px}
+ .btn{font-size:14px;padding:15px 20px}
+ .theme{font-size:12px;padding:10px 12px}
+}
