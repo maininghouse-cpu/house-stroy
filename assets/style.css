@@ -122,3 +122,6 @@ footer .brand b{color:#d71920}
 .lightbox-close:hover,.lightbox-arrow:hover{background:rgba(255,255,255,.28)}
 body.lightbox-open{overflow:hidden}
 @media(max-width:600px){.portfolio-photo img{height:130px}.portfolio-lightbox{padding:58px 12px 28px}.portfolio-lightbox figure img{max-height:calc(100vh - 125px)}.lightbox-arrow{width:38px;height:52px;font-size:38px}.lightbox-prev{left:7px}.lightbox-next{right:7px}.lightbox-close{right:10px;top:10px}}
+
+/* Gallery count hint on the second portfolio preview */
+.photo-more{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.48);color:#fff;font-size:15px;font-weight:700;letter-spacing:.02em;text-shadow:0 1px 3px rgba(0,0,0,.6)}
