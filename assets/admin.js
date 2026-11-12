@@ -57,10 +57,17 @@ async function compressImage(file){
 }
 async function uploadFile(file,projectId,kind){
  const optimized=await compressImage(file);
- const ext=optimized.type==="image/webp"?"webp":optimized.type==="image/png"?"png":optimized.type==="image/avif"?"avif":"jpg";
- const path=projectId+"/"+kind+"/"+crypto.randomUUID()+"."+ext;
- const {error}=await sb.storage.from("project-media").upload(path,optimized,{contentType:optimized.type,upsert:false});
- if(error)throw error;
+ const form=new FormData();
+ form.append("file",optimized,optimized.name);
+ form.append("project_id",projectId);
+ form.append("category",kind);
+ form.append("title",optimized.name);
+ form.append("alt_text",optimized.name);
+ const {data,error}=await sb.functions.invoke("admin-upload-project-media",{body:form});
+ if(error)throw new Error("Ошибка серверной загрузки: "+(error.message||String(error)));
+ if(!data?.ok)throw new Error(data?.error||"Сервер не подтвердил загрузку.");
+ const path=kind==="cover"?data.cover_path:data.media?.storage_path;
+ if(!path)throw new Error("Сервер не вернул путь загруженного файла.");
  return {path,url:publicUrl(path),optimizedBytes:optimized.size,originalBytes:file.size};
 }
 async function saveProject(e){
