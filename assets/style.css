@@ -13,3 +13,18 @@ main{min-height:55vh}.section{padding:82px 0}.section.alt{background:var(--surfa
 footer{background:#101010;color:#fff;padding:30px 0}.foot{display:flex;justify-content:space-between;align-items:center;gap:20px}.foot small{color:#999;font-size:11px}.foot nav{display:flex;gap:18px;font-size:11px;color:#ccc}
 @media(max-width:900px){header{height:auto;min-height:92px;flex-wrap:wrap;padding:15px 20px;gap:15px}.nav{order:3;width:100%;overflow:auto;padding:5px 0 9px;gap:22px}.head-actions{margin-left:auto}.tel{font-size:12px}.grid{grid-template-columns:1fr 1fr}.steps{grid-template-columns:1fr 1fr}.contact-grid{grid-template-columns:1fr}}
 @media(max-width:560px){header{padding:12px 16px}.brand{font-size:18px}.wrap{width:calc(100% - 32px)}.hero{min-height:620px}.hero h1{font-size:48px}.grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr;gap:10px}.section{padding:62px 0}.foot{align-items:flex-start;flex-direction:column}.foot nav{flex-wrap:wrap}.theme{padding:9px}.tel{display:none}}
+
+/* Callback request */
+.callback-fab{position:fixed;right:26px;bottom:26px;z-index:40;display:flex;align-items:center;gap:10px;padding:16px 22px;border:0;border-radius:999px;background:var(--red);color:#fff;font:700 13px Inter,Arial,sans-serif;box-shadow:0 10px 30px #0003;cursor:pointer;transition:transform .2s,background .2s}
+.callback-fab:hover{background:#a90f16;transform:translateY(-3px)}
+.callback-fab:first-letter{font-size:17px}
+.callback-overlay{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:20px;background:#0009;backdrop-filter:blur(5px)}
+.callback-overlay.is-open{display:flex}
+.callback-dialog{position:relative;width:min(100%,470px);max-height:calc(100vh - 40px);overflow:auto;padding:38px;background:var(--surface);color:var(--text);box-shadow:0 25px 80px #0005}
+.callback-dialog h2{font:700 30px/1.1 Manrope,Arial,sans-serif;letter-spacing:-.04em;margin:13px 0}
+.callback-dialog>p{color:var(--muted);font-size:13px;line-height:1.65;margin:0 0 24px}
+.callback-close{position:absolute;right:16px;top:12px;border:0;background:transparent;color:var(--muted);font-size:30px;cursor:pointer}
+.callback-dialog .field input{border-radius:0}
+.callback-dialog .btn{width:100%}
+.callback-dialog .notice{margin:14px 0 0}
+@media(max-width:560px){.callback-fab{right:14px;bottom:14px;padding:14px 18px}.callback-dialog{padding:30px 22px}.callback-dialog h2{font-size:26px}}
