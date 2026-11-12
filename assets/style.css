@@ -125,3 +125,13 @@ body.lightbox-open{overflow:hidden}
 
 /* Gallery count hint on the second portfolio preview */
 .photo-more{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.48);color:#fff;font-size:15px;font-weight:700;letter-spacing:.02em;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+
+
+/* Thumbnail strip below the active portfolio photo */
+.portfolio-lightbox figure{width:min(100%,1200px);min-height:0}
+.lightbox-thumbnails{display:flex;align-items:center;justify-content:flex-start;gap:9px;width:min(100%,900px);max-width:100%;overflow-x:auto;padding:4px 3px 9px;scrollbar-width:thin;scrollbar-color:#888 transparent}
+.lightbox-thumb{flex:0 0 84px;width:84px;height:60px;padding:0;border:2px solid transparent;border-radius:5px;background:#222;overflow:hidden;cursor:pointer;opacity:.62;transition:opacity .18s,border-color .18s,transform .18s}
+.lightbox-thumb img{display:block;width:100%;height:100%;object-fit:cover}
+.lightbox-thumb:hover{opacity:1;transform:translateY(-2px)}
+.lightbox-thumb.is-active{opacity:1;border-color:#e32630;box-shadow:0 0 0 1px #e32630}
+@media(max-width:600px){.lightbox-thumbnails{gap:6px}.lightbox-thumb{flex-basis:66px;width:66px;height:48px}}
