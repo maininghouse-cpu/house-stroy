@@ -39,7 +39,7 @@ callbackOpen.addEventListener('click',()=>{callbackDialog.classList.add('is-open
 document.querySelector('.callback-close').addEventListener('click',callbackClose);
 callbackDialog.addEventListener('click',e=>{if(e.target===callbackDialog)callbackClose();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&callbackDialog.classList.contains('is-open'))callbackClose();});
-document.querySelector('#callbackForm').addEventListener('submit',e=>{
+document.querySelector('#callbackForm').addEventListener('submit',async e=>{
  e.preventDefault();
  const name=document.querySelector('#callbackName').value.trim();
  const phone=document.querySelector('#callbackPhone').value.trim();
