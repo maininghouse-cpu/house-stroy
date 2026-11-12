@@ -1,7 +1,7 @@
 (() => {
 const sb = window.houseStroyClient;
 const $ = id => document.getElementById(id);
-const categories = { images: "Дополнительные фотографии", threeD: "3D-визуализации", plans: "Планы этажей", facades: "Фасады" };
+const categories = { photos: "Фотографии (PHOTO)", images: "Дополнительные фотографии", threeD: "3D-визуализации", plans: "Планы этажей", facades: "Фасады" };
 let projects = [], currentId = null, cover = null, media = {images:[],threeD:[],plans:[],facades:[]}, user = null;
 const status = (id, msg, bad=false) => { const el=$(id); if(el){el.textContent=msg;el.style.color=bad?"#b82025":"";} };
 const slugify = s => s.toLowerCase().trim().replace(/ё/g,"e").replace(/[^a-zа-я0-9]+/gi,"-").replace(/^-|-$/g,"") || "house";
@@ -9,7 +9,7 @@ const escapeHtml = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&
 const publicUrl = path => path ? sb.storage.from("project-media").getPublicUrl(path).data.publicUrl : "";
 function mapProject(row) {
  const spec=row.specifications||{}, rows=row.project_media||[];
- const grouped={images:[],threeD:[],plans:[],facades:[]};
+ const grouped={photos:[],images:[],threeD:[],plans:[],facades:[]};
  rows.sort((a,b)=>a.sort_order-b.sort_order).forEach(m=>{if(grouped[m.category])grouped[m.category].push({id:m.id,path:m.storage_path,url:publicUrl(m.storage_path),title:m.title||""})});
  return {id:row.id,slug:row.slug,specifications:spec,name:row.title,description:row.description||"",shortDescription:row.short_description||"",price:row.price||0,totalArea:row.total_area||0,livingArea:row.living_area||0,floors:row.floors||1,bedrooms:row.bedrooms||0,bathrooms:row.bathrooms||0,published:row.is_published,featured:row.is_featured,sortOrder:row.sort_order||0,cover:spec.cover_path?{path:spec.cover_path,url:publicUrl(spec.cover_path)}:(spec.cover_url?{path:null,url:spec.cover_url}:null),media:grouped};
 }
@@ -22,7 +22,7 @@ function renderList(){
  document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>loadForm(b.dataset.edit));
 }
 function clearForm(){
- currentId=null;cover=null;media={images:[],threeD:[],plans:[],facades:[]};$("editor").reset();$("id").value="";$("delete").disabled=true;
+ currentId=null;cover=null;media={photos:[],images:[],threeD:[],plans:[],facades:[]};$("editor").reset();$("id").value="";$("delete").disabled=true;
  renderThumbs("cover");Object.keys(categories).forEach(renderThumbs);status("editorStatus","Новый проект. Заполните характеристики и сохраните.");
 }
 function renderThumbs(key){
