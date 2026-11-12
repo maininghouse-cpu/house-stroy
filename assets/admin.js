@@ -130,6 +130,56 @@ function addFiles(key,fileList){
   if(key==="cover")cover=item;else media[key].push(item);
  }renderThumbs(key);
 }
+
+async function importProjectZip(){
+ const input=$("projectZip"),file=input?.files?.[0],btn=$("importZipBtn");
+ if(!file){status("zipStatus","Сначала выберите ZIP-архив.",true);return;}
+ if(!window.JSZip){status("zipStatus","Не загрузился модуль чтения ZIP. Обновите страницу.",true);return;}
+ btn.disabled=true;
+ try{
+  status("zipStatus","Читаю архив…");
+  const zip=await JSZip.loadAsync(file), lookup=new Map(projects.map(p=>[p.name.trim().toLowerCase(),p]));
+  const groups={};
+  for(const entry of Object.values(zip.files)){
+   if(entry.dir||entry.name.startsWith("__MACOSX/")||entry.name.includes("/._"))continue;
+   const parts=entry.name.split("/");if(parts.length<2)continue;
+   const folder=parts[0].trim().toLowerCase(),project=lookup.get(folder);if(!project)continue;
+   const filename=parts.slice(1).join("/").split("/").pop(),low=filename.toLowerCase();
+   if(!/\.(jpe?g|png|webp|avif)$/i.test(filename))continue;
+   let kind;
+   if(/^главная\./i.test(filename))kind="cover";
+   else if(/^3d/i.test(filename))kind="threeD";
+   else if(/^фасад/i.test(filename))kind="facades";
+   else if(/^photo/i.test(filename))kind="photos";
+   else if(/план/i.test(filename))kind="plans";
+   else continue;
+   (groups[project.id]??=[]).push({project,entry,filename,kind});
+  }
+  const items=Object.values(groups).flat();
+  if(!items.length)throw new Error("В архиве не найдены изображения с распознаваемыми названиями папок и файлов.");
+  let done=0;const inserted=[];
+  for(const item of items){
+   status("zipStatus","Загружаю "+(++done)+" из "+items.length+": "+item.project.name+" / "+item.filename);
+   const blob=await item.entry.async("blob"),mime=blob.type||(/\.png$/i.test(item.filename)?"image/png":"image/jpeg");
+   const uploadFileObj=new File([blob],item.filename,{type:mime});
+   const kind=item.kind==="cover"?"cover":item.kind;
+   const uploaded=await uploadFile(uploadFileObj,item.project.id,kind);
+   if(kind==="cover"){
+    const old=item.project.specifications||{},spec={...old,cover_path:uploaded.path};delete spec.cover_url;
+    const {error}=await sb.from("projects").update({specifications:spec}).eq("id",item.project.id);
+    if(error)throw error;
+    item.project.specifications=spec;
+   }else{
+    inserted.push({project_id:item.project.id,category:kind,storage_path:uploaded.path,title:item.filename,alt_text:item.project.name+" — "+item.filename,sort_order:inserted.filter(x=>x.project_id===item.project.id&&x.category===kind).length});
+   }
+  }
+  if(inserted.length){const {error}=await sb.from("project_media").insert(inserted);if(error)throw error;}
+  await loadProjects();
+  status("zipStatus","Готово: загружено "+items.length+" изображений для "+Object.keys(groups).length+" проектов. Обложки и категории сохранены.");
+ }catch(err){console.error(err);status("zipStatus","Ошибка пакетной загрузки: "+(err.message||String(err)),true);}
+ finally{btn.disabled=false;}
+}
+
 async function openWorkspace(){
  const {data:{user:authUser},error}=await sb.auth.getUser();
  if(error||!authUser){$("loginPanel").classList.remove("hidden");$("workspace").classList.add("hidden");return;}
@@ -137,7 +187,7 @@ async function openWorkspace(){
  if(user.app_metadata?.role!=="admin"){await sb.auth.signOut();status("loginStatus","У этой учётной записи нет роли администратора.",true);return;}
  $("loginPanel").classList.add("hidden");$("workspace").classList.remove("hidden");
  $("sessionStatus").textContent="Вы вошли как "+user.email+" · роль admin";
- setupUploads();clearForm();
+ setupUploads();clearForm();$("importZipBtn")?.addEventListener("click",importProjectZip);
  try{await loadProjects();}catch(err){status("sessionStatus","Не удалось загрузить проекты: "+err.message,true);}
 }
 $("loginForm").onsubmit=async e=>{
