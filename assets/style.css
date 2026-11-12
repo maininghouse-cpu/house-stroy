@@ -28,3 +28,31 @@ footer{background:#101010;color:#fff;padding:30px 0}.foot{display:flex;justify-c
 .callback-dialog .btn{width:100%}
 .callback-dialog .notice{margin:14px 0 0}
 @media(max-width:560px){.callback-fab{right:14px;bottom:14px;padding:14px 18px}.callback-dialog{padding:30px 22px}.callback-dialog h2{font-size:26px}}
+
+
+/* Callback modal — black and red HOUSE STROY style */
+.callback-fab{background:#b5121b;color:#fff;border-radius:4px;letter-spacing:.02em}
+.callback-fab:hover{background:#8f0d15}
+.callback-overlay{background:rgba(8,9,10,.82);backdrop-filter:blur(7px);padding:24px}
+.callback-dialog{width:min(100%,860px);max-height:calc(100vh - 48px);padding:54px 9% 48px;background:#f1f3f4;color:#17262c;border-radius:12px;box-shadow:0 28px 90px #0008}
+.callback-kicker{text-align:center;color:#a70f18;font-size:14px;font-weight:800;letter-spacing:.12em;margin:0 0 24px}
+.callback-dialog h2{text-align:center;color:#17191b;font:800 clamp(30px,4.4vw,48px)/1.12 Manrope,Arial,sans-serif;letter-spacing:-.035em;margin:0 0 22px}
+.callback-dialog .callback-intro{text-align:center;max-width:650px;margin:0 auto 38px;color:#4b5b63;font-size:clamp(16px,2.2vw,22px);line-height:1.5}
+.callback-close{right:20px;top:18px;width:48px;height:48px;border:1px solid #c5cdd1;color:#1a2024;font-size:32px;line-height:1}
+.callback-close:hover{background:#b5121b;color:white;border-color:#b5121b}
+.callback-method{border:0;padding:0;margin:0 auto 28px;max-width:660px}
+.callback-method legend{font-size:17px;font-weight:700;color:#50616a;margin:0 0 14px}
+.callback-methods{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.callback-method-option{min-height:64px;border:1.5px solid #b8c2c7;border-radius:6px;background:transparent;color:#8f1018;font:700 18px Manrope,Arial,sans-serif;cursor:pointer}
+.callback-method-option.is-selected{background:#a90f18;border-color:#a90f18;color:#fff}
+.callback-field{max-width:660px;margin:0 auto 12px}
+.callback-field label{display:block;font-size:18px;font-weight:700;margin:0 0 9px;color:#202b30}
+.callback-field input{width:100%;min-height:72px;padding:16px 22px;border:1.5px solid #c5bfb8;border-radius:5px;background:#fff;color:#1d2529;font:500 20px Manrope,Arial,sans-serif;outline:none}
+.callback-field input:focus{border-color:#b5121b;box-shadow:0 0 0 3px #b5121b20}
+.callback-field input::placeholder{color:#85857e}
+.callback-consent{display:flex;align-items:flex-start;gap:13px;max-width:660px;margin:22px auto 26px;color:#26363d;font-size:16px;line-height:1.5;cursor:pointer}
+.callback-consent input{width:22px;height:22px;flex:0 0 22px;margin:2px 0 0;accent-color:#b5121b}
+.callback-submit{display:flex;align-items:center;justify-content:center;gap:22px;width:min(100%,660px);min-height:82px;margin:0 auto;border:0;border-radius:0;background:#a90f18;color:#fff;font:700 21px Manrope,Arial,sans-serif;cursor:pointer;transition:background .2s}
+.callback-submit:hover{background:#790b12}
+.callback-note{text-align:center;margin:22px 0 0;color:#4b5b63;font-size:17px;line-height:1.45}
+@media(max-width:600px){.callback-overlay{padding:12px}.callback-dialog{padding:54px 20px 28px;max-height:calc(100vh - 24px)}.callback-kicker{font-size:11px;margin-bottom:16px}.callback-dialog h2{font-size:30px}.callback-dialog .callback-intro{font-size:16px;margin-bottom:26px}.callback-method-option{min-height:56px;font-size:16px}.callback-field label{font-size:16px}.callback-field input{min-height:60px;font-size:17px;padding:13px 15px}.callback-submit{min-height:66px;font-size:18px}.callback-consent{font-size:14px}.callback-note{font-size:15px}}
