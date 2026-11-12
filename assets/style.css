@@ -68,3 +68,18 @@ footer{background:#101010;color:#fff;padding:30px 0}.foot{display:flex;justify-c
 .project-card .meta{margin-top:0;padding-top:0;border-top:0;align-items:center}
 .project-card .price{font-size:19px}
 @media(max-width:560px){.project-stats{gap:12px 8px;margin:16px 0 14px;padding:14px 0}.project-stat strong{font-size:21px}.project-stat span{font-size:11px}}
+
+
+/* Light header and footer bars in both site themes */
+header{background:#fff!important;color:#171717!important;border-bottom:1px solid #e9e6e2;box-shadow:0 5px 24px #0000000d}
+header .brand{color:#171717}
+header .nav a{color:#292929;opacity:.86}
+header .nav a:hover,header .nav a.active{color:#d71920;opacity:1}
+header .tel{color:#242424}
+header .theme{color:#242424;border-color:#d6d2cd;background:#fff}
+header .theme:hover{border-color:#d71920;color:#d71920}
+footer{background:#fff!important;color:#171717!important;border-top:1px solid #e9e6e2;box-shadow:0 -5px 24px #00000008}
+footer .brand{color:#171717}
+footer .foot small{color:#686868}
+footer .foot nav{color:#555}
+footer .foot nav a:hover{color:#d71920}
