@@ -50,7 +50,7 @@ footer{background:#101010;color:#fff;padding:30px 0}.foot{display:flex;justify-c
 .callback-field input{width:100%;min-height:72px;padding:16px 22px;border:1.5px solid #c5bfb8;border-radius:5px;background:#fff;color:#1d2529;font:500 20px Manrope,Arial,sans-serif;outline:none}
 .callback-field input:focus{border-color:#b5121b;box-shadow:0 0 0 3px #b5121b20}
 .callback-field input::placeholder{color:#85857e}
-.callback-consent{display:flex;align-items:flex-start;gap:13px;max-width:660px;margin:22px auto 26px;color:#26363d;font-size:16px;line-height:1.5;cursor:pointer}
+.callback-consent{display:flex;align-items:center;justify-content:center;gap:13px;width:fit-content;max-width:660px;margin:22px auto 26px;color:#26363d;font-size:16px;line-height:1.5;text-align:center;cursor:pointer}
 .callback-consent input{width:22px;height:22px;flex:0 0 22px;margin:2px 0 0;accent-color:#b5121b}
 .callback-submit{display:flex;align-items:center;justify-content:center;gap:22px;width:min(100%,660px);min-height:82px;margin:0 auto;border:0;border-radius:0;background:#a90f18;color:#fff;font:700 21px Manrope,Arial,sans-serif;cursor:pointer;transition:background .2s}
 .callback-submit:hover{background:#790b12}
