@@ -47,6 +47,32 @@
 @media(max-width:600px){#lightbox{padding:62px 10px 12px;gap:8px}#lightbox #lightboxImage{max-height:calc(100vh - 190px)}#lightbox .lightbox-thumbs{width:100%;min-height:66px;flex-basis:66px;padding:6px;gap:7px}#lightbox .lightbox-thumb{flex-basis:66px;width:66px;min-width:66px;height:48px}#lightbox .prev{left:8px}#lightbox .next{right:8px}}
 .back{display:inline-block;margin-bottom:20px}
 @media(max-width:750px){.detail-hero{grid-template-columns:1fr}.detail-hero>img{height:260px}.gallery figure{flex-basis:84%;width:84%}.gallery img{height:230px}.detail{margin:28px auto;padding:0 16px}.project-nav{grid-template-columns:1fr}.gallery-count{font-size:11px}}
+
+/* Project information tabs below the photo gallery */
+.project-info-tabs{display:flex;flex-wrap:wrap;gap:10px;margin:34px 0 0;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.project-info-tab{padding:14px 24px;border:1px solid var(--line);border-radius:30px;background:var(--surface);color:var(--text);font:800 14px Manrope,Arial,sans-serif;cursor:pointer;transition:.2s}
+.project-info-tab:hover{border-color:#d71920;color:#d71920;transform:translateY(-2px)}
+.project-info-tab.active{background:#b82025;border-color:#b82025;color:#fff}
+.project-info-panel{padding:30px 2px 12px;animation:projectInfoIn .2s ease}
+.project-info-panel[hidden]{display:none}
+@keyframes projectInfoIn{from{opacity:.4;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.project-info-panel h2{font:800 clamp(25px,3vw,36px)/1.15 Manrope,Arial,sans-serif;margin:10px 0 16px}
+.project-info-panel p{color:var(--muted);font-size:14px;line-height:1.8;max-width:850px}
+.project-info-specs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:24px}
+.project-info-spec{padding:17px;background:var(--surface);border:1px solid var(--line)}
+.project-info-spec span{display:block;color:var(--muted);font-size:12px;margin-bottom:8px}
+.project-info-spec strong{font:800 19px Manrope,Arial,sans-serif}
+.project-package-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-top:22px}
+.project-package-item{padding:20px;background:var(--surface);border:1px solid var(--line);border-top:3px solid #d71920}
+.project-package-item h3{font:800 16px Manrope;margin:0 0 9px}
+.project-package-item p{font-size:12px;line-height:1.7;margin:0}
+.project-escrow{display:grid;grid-template-columns:64px 1fr;gap:20px;max-width:900px;padding:26px;background:var(--surface);border:1px solid var(--line)}
+.project-escrow-icon{width:58px;height:58px;display:grid;place-items:center;background:#b82025;color:white;font:800 30px Manrope}
+.project-escrow ul{padding-left:20px;color:var(--muted);font-size:13px;line-height:1.9}
+.project-escrow .escrow-note{padding:12px 16px;border-left:3px solid #d71920;background:var(--bg)}
+@media(max-width:800px){.project-info-specs{grid-template-columns:repeat(3,minmax(0,1fr))}.project-package-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.project-info-tabs{gap:7px}.project-info-tab{flex:1 1 auto;padding:12px 10px;font-size:12px}.project-info-specs{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.project-info-spec{padding:13px}.project-package-grid{grid-template-columns:1fr}.project-escrow{grid-template-columns:1fr;padding:18px}}
+
 </style>
 <link rel="stylesheet" href="assets/header-size.css?v=20261112-1"></head>
 <body>
@@ -157,6 +183,22 @@ function renderGallery(){
  '<nav class="project-nav" aria-label="Навигация по проектам">'+(prev?'<a href="project.html?id='+encodeURIComponent(prev.id)+'"><small>← Предыдущий проект</small><strong>'+esc(prev.name)+'</strong></a>':'<span></span>')+(next?'<a href="project.html?id='+encodeURIComponent(next.id)+'"><small>Следующий проект →</small><strong>'+esc(next.name)+'</strong></a>':'<span></span>')+'</nav>';
  document.getElementById("cover").onclick=()=>{if(project.cover)openLightbox(0,[{src:project.cover,category:"cover"},...allSlides.filter(s=>s.src!==project.cover)]);};
  renderGallery();
+
+ // Information tabs directly below the project photo gallery
+ const infoMarkup = '<div class="project-info-tabs" role="tablist" aria-label="Информация о проекте"><button type="button" class="project-info-tab active" data-info-tab="about" aria-selected="true">О проекте</button><button type="button" class="project-info-tab" data-info-tab="package" aria-selected="false">Комплектация</button><button type="button" class="project-info-tab" data-info-tab="escrow" aria-selected="false">Ипотека с эскроу</button></div>'+
+ '<section class="project-info-panel" data-info-panel="about" role="tabpanel"><div class="eyebrow">HOUSE STROY / О ПРОЕКТЕ</div><h2>О проекте</h2><p>'+esc(project.description||"Архитектурное решение можно адаптировать под особенности участка и ваши пожелания. Подробности планировки и характеристики дома уточняются при консультации.")+'</p><div class="project-info-specs"><div class="project-info-spec"><span>Общая площадь</span><strong>'+esc(project.totalArea)+' м²</strong></div><div class="project-info-spec"><span>Жилая площадь</span><strong>'+esc(project.livingArea)+' м²</strong></div><div class="project-info-spec"><span>Этажность</span><strong>'+esc(project.floors)+'</strong></div><div class="project-info-spec"><span>Спальни</span><strong>'+esc(project.bedrooms)+'</strong></div><div class="project-info-spec"><span>Санузлы</span><strong>'+esc(project.bathrooms||"—")+'</strong></div></div></section>'+
+ '<section class="project-info-panel" data-info-panel="package" role="tabpanel" hidden><div class="eyebrow">СОСТАВ СТРОИТЕЛЬСТВА</div><h2>Комплектация дома</h2><p>Комплектация подбирается под задачи и бюджет. Точный перечень материалов, оборудования и работ фиксируется в смете и договоре.</p><div class="project-package-grid"><article class="project-package-item"><h3>Фундамент</h3><p>Тип и параметры основания определяются с учётом участка и результатов оценки грунтов.</p></article><article class="project-package-item"><h3>Стены и конструктив</h3><p>Материалы и конструктивные решения — согласно согласованному проекту.</p></article><article class="project-package-item"><h3>Кровля</h3><p>Конструкция и кровельное покрытие выбираются в составе комплектации.</p></article><article class="project-package-item"><h3>Окна и двери</h3><p>Характеристики и состав оконных и дверных блоков указываются в спецификации.</p></article><article class="project-package-item"><h3>Инженерные системы</h3><p>Перечень инженерных работ и оборудования согласовывается до заключения договора.</p></article><article class="project-package-item"><h3>Отделка</h3><p>Внутренняя и внешняя отделка выполняется в объёме выбранной комплектации.</p></article></div></section>'+
+ '<section class="project-info-panel" data-info-panel="escrow" role="tabpanel" hidden><div class="project-escrow"><div class="project-escrow-icon">₽</div><div><div class="eyebrow">БЕЗОПАСНЫЙ ФОРМАТ РАСЧЁТОВ</div><h2>Ипотека с эскроу</h2><p>Строительство дома можно оформить с использованием ипотечного кредита и счёта эскроу, если такой формат доступен по выбранной программе банка и условиям договора.</p><ul><li>Подбор ипотечной программы с учётом вашей ситуации.</li><li>Согласование проекта, сметы и условий строительства.</li><li>Расчёты через счёт эскроу в соответствии с договором и требованиями банка.</li></ul><p class="escrow-note">Ставка, первоначальный взнос, требования к заёмщику и порядок раскрытия эскроу зависят от банка и действующей программы. Актуальные условия уточняются индивидуально.</p><a class="btn" href="contacts.html">Получить консультацию</a></div></div></section>';
+ const galleryWrap=document.querySelector(".gallery-wrap");
+ if(galleryWrap)galleryWrap.insertAdjacentHTML("afterend",infoMarkup);
+ const infoButtons=[...document.querySelectorAll("[data-info-tab]")];
+ const infoPanels=[...document.querySelectorAll("[data-info-panel]")];
+ infoButtons.forEach(button=>button.addEventListener("click",()=>{
+  const key=button.dataset.infoTab;
+  infoButtons.forEach(b=>{const active=b===button;b.classList.toggle("active",active);b.setAttribute("aria-selected",String(active));});
+  infoPanels.forEach(panel=>panel.hidden=panel.dataset.infoPanel!==key);
+ }));
+
  }catch(e){console.error(e);root.innerHTML="<h1>Не удалось загрузить проект</h1><p>Попробуйте обновить страницу.</p>";}})();
 </script>
 <script src="assets/legal.js?v=20261112-1"></script></body></html>
