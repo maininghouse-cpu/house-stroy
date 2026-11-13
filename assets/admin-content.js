@@ -42,22 +42,6 @@ async function loadReviews(){
  });
 }
 
-async function loadVideoReviews(){
- const {data,error}=await sb.from("video_reviews").select("*").order("sort_order").order("created_at",{ascending:false});if(error)throw error;
- $("videoReviewsAdminList").innerHTML=(data||[]).map(x=>'<div class="project-row"><span><b>'+esc(x.title)+'</b><br><small>'+(x.is_published?"Опубликован":"Скрыт")+' · '+esc(x.video_url)+'</small></span><span><button class="secondary" type="button" data-vedit="'+x.id+'">Изменить</button> <button class="secondary danger" type="button" data-vdelete="'+x.id+'">Удалить</button></span></div>').join("")||"<p>Видеоотзывов пока нет.</p>";
- (data||[]).forEach(x=>{
-  const edit=document.querySelector('[data-vedit="'+x.id+'"]');if(edit)edit.onclick=()=>{$("videoReviewId").value=x.id;$("videoReviewTitle").value=x.title;$("videoReviewUrl").value=x.video_url;$("videoReviewDescription").value=x.description||"";$("videoReviewOrder").value=x.sort_order||0;$("videoReviewPublished").checked=x.is_published;say("videoReviewStatus","Редактирование: "+x.title);};
-  const del=document.querySelector('[data-vdelete="'+x.id+'"]');if(del)del.onclick=async()=>{if(!confirm("Удалить видеоотзыв «"+x.title+"»?"))return;const {error}=await sb.from("video_reviews").delete().eq("id",x.id);if(error){say("videoReviewStatus","Ошибка удаления: "+error.message,true);return;}await loadVideoReviews();say("videoReviewStatus","Видеоотзыв удалён.");};
- });
-}
-function clearVideoReview(){$("videoReviewsAdminForm").reset();$("videoReviewId").value="";$("videoReviewOrder").value="0";say("videoReviewStatus","Новый видеоотзыв.");}
-$("videoReviewsAdminForm").addEventListener("submit",async e=>{
- e.preventDefault();const id=$("videoReviewId").value||crypto.randomUUID(),url=$("videoReviewUrl").value.trim();
- if(!/^https?:\/\/(?:www\.)?(?:vkvideo\.ru|vk\.com)\//i.test(url)){say("videoReviewStatus","Укажите ссылку на видео VK.",true);return;}
- const row={id,title:$("videoReviewTitle").value.trim(),video_url:url,description:$("videoReviewDescription").value.trim(),is_published:$("videoReviewPublished").checked,sort_order:Number($("videoReviewOrder").value)||0,updated_at:new Date().toISOString()},btn=$("videoReviewsAdminForm").querySelector('[type="submit"]');btn.disabled=true;
- try{const {error}=await sb.from("video_reviews").upsert(row);if(error)throw error;await loadVideoReviews();clearVideoReview();say("videoReviewStatus","Видеоотзыв сохранён.");}catch(err){say("videoReviewStatus","Ошибка сохранения: "+err.message,true);}finally{btn.disabled=false;}
-});
-$("videoReviewClear").onclick=clearVideoReview;
 function renderPortfolioPhotos(){
  const input=$("portfolioPhoto"),preview=$("portfolioPhotoPreview");
  let kept=[];try{kept=JSON.parse(input.dataset.galleryUrls||"[]");}catch{}
@@ -97,6 +81,6 @@ $("reviewsAdminForm").addEventListener("submit",async e=>{
 $("portfolioPhoto").addEventListener("change",renderPortfolioPhotos);
 ;
 $("portfolioClear").onclick=clearPortfolio;$("reviewClear").onclick=clearReview;
-async function init(){const {data:{user},error}=await sb.auth.getUser();if(error||!user||user.app_metadata?.role!=="admin")return;try{await Promise.all([loadPortfolio(),loadReviews(),loadVideoReviews()]);}catch(err){say("portfolioStatus","Не удалось загрузить портфолио: "+err.message,true);say("reviewStatus","Не удалось загрузить отзывы: "+err.message,true);}}
+async function init(){const {data:{user},error}=await sb.auth.getUser();if(error||!user||user.app_metadata?.role!=="admin")return;try{await Promise.all([loadPortfolio(),loadReviews()]);}catch(err){say("portfolioStatus","Не удалось загрузить портфолио: "+err.message,true);say("reviewStatus","Не удалось загрузить отзывы: "+err.message,true);}}
 sb.auth.onAuthStateChange(()=>{setTimeout(init,0);});init();
 })();
