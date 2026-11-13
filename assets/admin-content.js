@@ -33,15 +33,6 @@ async function loadPortfolio(){
   const del=document.querySelector('[data-pdelete="'+x.id+'"]');if(del)del.onclick=async()=>{if(!confirm("Удалить объект портфолио «"+x.title+"»?"))return;const {error}=await sb.from("portfolio_items").delete().eq("id",x.id);if(error){say("portfolioStatus","Ошибка удаления: "+error.message,true);return;}await loadPortfolio();say("portfolioStatus","Объект удалён.");};
  });
 }
-async function loadReviews(){
- const {data,error}=await sb.from("reviews").select("*").order("sort_order").order("created_at",{ascending:false});if(error)throw error;
- $("reviewsAdminList").innerHTML=(data||[]).map(x=>'<div class="project-row"><span><b>'+esc(x.author)+'</b><br><small>'+(x.is_published?"Опубликован":"Скрыт")+' · '+esc(x.project_label||"Без подписи")+'</small></span><span><button class="secondary" type="button" data-redit="'+x.id+'">Изменить</button> <button class="secondary danger" type="button" data-rdelete="'+x.id+'">Удалить</button></span></div>').join("")||"<p>Отзывов пока нет.</p>";
- (data||[]).forEach(x=>{
-  const edit=document.querySelector('[data-redit="'+x.id+'"]');if(edit)edit.onclick=()=>{$("reviewId").value=x.id;$("reviewAuthor").value=x.author;$("reviewProject").value=x.project_label||"";$("reviewContent").value=x.content;$("reviewRating").value=String(x.rating);$("reviewPublished").checked=x.is_published;$("reviewOrder").value=x.sort_order||0;say("reviewStatus","Редактирование отзыва: "+x.author);};
-  const del=document.querySelector('[data-rdelete="'+x.id+'"]');if(del)del.onclick=async()=>{if(!confirm("Удалить отзыв клиента «"+x.author+"»?"))return;const {error}=await sb.from("reviews").delete().eq("id",x.id);if(error){say("reviewStatus","Ошибка удаления: "+error.message,true);return;}await loadReviews();say("reviewStatus","Отзыв удалён.");};
- });
-}
-
 function renderPortfolioPhotos(){
  const input=$("portfolioPhoto"),preview=$("portfolioPhotoPreview");
  let kept=[];try{kept=JSON.parse(input.dataset.galleryUrls||"[]");}catch{}
@@ -66,7 +57,6 @@ async function deleteRemovedStoragePhotos(oldUrls,newUrls){
  if(paths.length){const {error}=await sb.storage.from("portfolio-media").remove(paths);if(error)console.warn("Не удалось удалить старые фото из хранилища:",error.message);}
 }
 function clearPortfolio(){$("portfolioAdminForm").reset();$("portfolioId").value="";$("portfolioOrder").value="0";$("portfolioPhoto").dataset.galleryUrls="[]";$("portfolioPhoto").dataset.originalGalleryUrls="[]";$("portfolioPhotoPreview").textContent="";say("portfolioStatus","Новый объект портфолио.");}
-function clearReview(){$("reviewsAdminForm").reset();$("reviewId").value="";$("reviewOrder").value="0";$("reviewRating").value="5";say("reviewStatus","Новый отзыв.");}
 $("portfolioAdminForm").addEventListener("submit",async e=>{
  e.preventDefault();const id=$("portfolioId").value||crypto.randomUUID(),btn=$("portfolioAdminForm").querySelector('[type="submit"]');btn.disabled=true;
  try{const oldGallery=(()=>{try{return JSON.parse($("portfolioPhoto").dataset.originalGalleryUrls||"[]");}catch{return [];}})();const gallery=await uploadPhotos(id),cover=gallery[0]||$("portfolioImage").value.trim()||null;
@@ -74,13 +64,9 @@ $("portfolioAdminForm").addEventListener("submit",async e=>{
  const {error}=await sb.from("portfolio_items").upsert(row);if(error)throw error;await deleteRemovedStoragePhotos(oldGallery,gallery);await loadPortfolio();clearPortfolio();say("portfolioStatus","Объект и фотографии сохранены.");
  }catch(err){say("portfolioStatus","Ошибка сохранения: "+err.message,true);}finally{btn.disabled=false;}
 });
-$("reviewsAdminForm").addEventListener("submit",async e=>{
- e.preventDefault();const id=$("reviewId").value||crypto.randomUUID(),row={id,author:$("reviewAuthor").value.trim(),project_label:$("reviewProject").value.trim()||null,content:$("reviewContent").value.trim(),rating:Number($("reviewRating").value),is_published:$("reviewPublished").checked,sort_order:Number($("reviewOrder").value)||0,updated_at:new Date().toISOString()},btn=$("reviewsAdminForm").querySelector('[type="submit"]');btn.disabled=true;
- try{const {error}=await sb.from("reviews").upsert(row);if(error)throw error;await loadReviews();clearReview();say("reviewStatus","Изменения отзывов сохранены.");}catch(err){say("reviewStatus","Ошибка сохранения: "+err.message,true);}finally{btn.disabled=false;}
-});
 $("portfolioPhoto").addEventListener("change",renderPortfolioPhotos);
 ;
-$("portfolioClear").onclick=clearPortfolio;$("reviewClear").onclick=clearReview;
-async function init(){const {data:{user},error}=await sb.auth.getUser();if(error||!user||user.app_metadata?.role!=="admin")return;try{await Promise.all([loadPortfolio(),loadReviews()]);}catch(err){say("portfolioStatus","Не удалось загрузить портфолио: "+err.message,true);say("reviewStatus","Не удалось загрузить отзывы: "+err.message,true);}}
+$("portfolioClear").onclick=clearPortfolio;
+async function init(){const {data:{user},error}=await sb.auth.getUser();if(error||!user||user.app_metadata?.role!=="admin")return;try{await loadPortfolio();}catch(err){say("portfolioStatus","Не удалось загрузить портфолио: "+err.message,true);}}
 sb.auth.onAuthStateChange(()=>{setTimeout(init,0);});init();
 })();
