@@ -11,7 +11,7 @@ function mapProject(row) {
  const spec=row.specifications||{}, rows=row.project_media||[];
  const grouped={photos:[],images:[],threeD:[],plans:[],facades:[]};
  rows.sort((a,b)=>a.sort_order-b.sort_order).forEach(m=>{if(grouped[m.category])grouped[m.category].push({id:m.id,path:m.storage_path,url:publicUrl(m.storage_path),title:m.title||""})});
- return {id:row.id,slug:row.slug,specifications:spec,name:row.title,description:row.description||"",shortDescription:row.short_description||"",price:row.price||0,totalArea:row.total_area||0,livingArea:row.living_area||0,floors:row.floors||1,bedrooms:row.bedrooms||0,bathrooms:row.bathrooms||0,published:row.is_published,featured:row.is_featured,sortOrder:row.sort_order||0,cover:spec.cover_path?{path:spec.cover_path,url:publicUrl(spec.cover_path)}:(spec.cover_url?{path:null,url:spec.cover_url}:null),media:grouped};
+ return {id:row.id,slug:row.slug,specifications:spec,name:row.title,description:row.description||"",shortDescription:row.short_description||"",price:row.price||0,totalArea:row.total_area||0,livingArea:row.living_area||0,dimensions:spec.dimensions||"",floors:row.floors||1,bedrooms:row.bedrooms||0,bathrooms:row.bathrooms||0,published:row.is_published,featured:row.is_featured,sortOrder:row.sort_order||0,cover:spec.cover_path?{path:spec.cover_path,url:publicUrl(spec.cover_path)}:(spec.cover_url?{path:null,url:spec.cover_url}:null),media:grouped};
 }
 async function loadProjects() {
  const {data,error}=await sb.from("projects").select("*, project_media(*)").order("sort_order").order("created_at",{ascending:false});
@@ -25,7 +25,7 @@ const DRAFT_KEY="houseStroyProjectDraft:v2";
 function saveDraft(){
  try{
   const fields={};
-  ["name","price","totalArea","livingArea","floors","bedrooms","bathrooms","shortDescription","description"].forEach(id=>fields[id]=$(id)?.value??"");
+  ["name","price","totalArea","dimensions","floors","bedrooms","bathrooms","shortDescription","description"].forEach(id=>fields[id]=$(id)?.value??"");
   fields.published=!!$("published")?.checked;fields.featured=!!$("featured")?.checked;
   const clean=item=>item&&!item.file?{id:item.id||null,path:item.path||null,url:item.url||null,title:item.title||""}:null;
   const snapshot={userId:user?.id||null,currentId,fields,cover:clean(cover),media:Object.fromEntries(Object.keys(categories).map(k=>[k,(media[k]||[]).map(clean).filter(Boolean)])),savedAt:Date.now()};
@@ -65,7 +65,7 @@ function renderThumbs(key){
 function loadForm(id){
  const p=projects.find(x=>x.id===id);if(!p)return;currentId=p.id;cover=p.cover?{...p.cover}:null;
  media=Object.fromEntries(Object.keys(categories).map(k=>[k,[...(p.media[k]||[])].map(x=>({...x}))]));
- $("id").value=p.id;$("name").value=p.name;$("price").value=p.price;$("totalArea").value=p.totalArea;$("livingArea").value=p.livingArea;$("floors").value=p.floors;$("bedrooms").value=p.bedrooms;$("bathrooms").value=p.bathrooms;$("shortDescription").value=p.shortDescription;$("description").value=p.description;$("published").checked=p.published;$("featured").checked=p.featured;$("delete").disabled=false;
+ $("id").value=p.id;$("name").value=p.name;$("price").value=p.price;$("totalArea").value=p.totalArea;$("dimensions").value=p.dimensions||"";$("floors").value=p.floors;$("bedrooms").value=p.bedrooms;$("bathrooms").value=p.bathrooms;$("shortDescription").value=p.shortDescription;$("description").value=p.description;$("published").checked=p.published;$("featured").checked=p.featured;$("delete").disabled=false;
  renderThumbs("cover");Object.keys(categories).forEach(renderThumbs);status("editorStatus","Редактирование проекта. Сохраните изменения после проверки.");saveDraft();
 }
 async function compressImage(file){
@@ -114,11 +114,12 @@ async function saveProject(e){
   const id=currentId||crypto.randomUUID(),name=$("name").value.trim(),old=projects.find(p=>p.id===id);
   if(!name){$("name").focus();throw new Error("Сначала укажите название проекта.");}
   const specs={...(old?.specifications||{})};
+  const dimensions=$("dimensions").value.trim();if(dimensions)specs.dimensions=dimensions;else delete specs.dimensions;
   let coverPath=cover?.path||null,coverUrl=cover?.path?null:(cover?.url||null);
   if(cover===null){coverPath=null;coverUrl=null;}
   if(coverPath)specs.cover_path=coverPath;else delete specs.cover_path;
   if(coverUrl)specs.cover_url=coverUrl;else delete specs.cover_url;
-  const row={id,slug:slugify(name)+"-"+id.slice(0,8),title:name,short_description:$("shortDescription").value.trim(),description:$("description").value.trim(),total_area:Number($("totalArea").value)||null,living_area:Number($("livingArea").value)||null,price:Number($("price").value)||null,floors:Number($("floors").value)||1,bedrooms:Number($("bedrooms").value)||0,bathrooms:Number($("bathrooms").value)||0,is_published:$("published").checked,is_featured:$("featured").checked,sort_order:old?.sortOrder||0,specifications:specs};
+  const row={id,slug:slugify(name)+"-"+id.slice(0,8),title:name,short_description:$("shortDescription").value.trim(),description:$("description").value.trim(),total_area:Number($("totalArea").value)||null,price:Number($("price").value)||null,floors:Number($("floors").value)||1,bedrooms:Number($("bedrooms").value)||0,bathrooms:Number($("bathrooms").value)||0,is_published:$("published").checked,is_featured:$("featured").checked,sort_order:old?.sortOrder||0,specifications:specs};
   const {error:upsertError}=await sb.from("projects").upsert(row);if(upsertError)throw upsertError;
   const keepPaths=new Set();
   if(cover?.file){const uploaded=await uploadFile(cover.file,id,"cover");coverPath=uploaded.path;coverUrl=null;keepPaths.add(coverPath);}
