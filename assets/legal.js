@@ -13,7 +13,7 @@
   #hs-legal .dialog{position:relative;width:min(760px,100%);max-height:85vh;overflow:auto;background:var(--surface,#fff);color:var(--text,#171717);padding:30px;border-radius:12px;box-shadow:0 20px 70px #0005}
   #hs-legal h2{font:700 25px Manrope,Arial,sans-serif;margin:0 42px 20px 0}#hs-legal h3{font-size:16px;margin:20px 0 8px}
   #hs-legal p,#hs-legal li{font-size:13px;line-height:1.7}#hs-legal .x{position:absolute;right:18px;top:14px;border:0;background:transparent;color:inherit;font-size:28px;cursor:pointer}
-  .hs-legal-links{display:flex;flex-wrap:wrap;gap:10px 20px;margin-top:18px;font-size:12px}
+  .hs-legal-links{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;text-align:center;gap:10px 20px;margin:18px auto 0;font-size:12px;width:100%}
   .hs-consent{display:flex;gap:9px;align-items:flex-start;margin:14px 0;font-size:12px;line-height:1.5}.hs-consent input{margin-top:2px}
   @media(max-width:650px){#hs-cookie{align-items:stretch;flex-direction:column;gap:12px;padding:15px}#hs-cookie button{width:100%}#hs-legal .dialog{padding:23px 18px}}
   `;
