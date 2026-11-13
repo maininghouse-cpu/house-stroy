@@ -47,6 +47,7 @@ function restoreDraft(){
   $("delete").disabled=!currentId;
   renderThumbs("cover");Object.keys(categories).forEach(renderThumbs);
   status("editorStatus",currentId?"Черновик восстановлен — вы продолжаете редактирование выбранного проекта.":"Черновик нового проекта восстановлен.");
+  saveDraft();
   return true;
  }catch(err){console.warn("Не удалось восстановить черновик редактора",err);return false;}
 }
