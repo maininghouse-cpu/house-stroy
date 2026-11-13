@@ -2,7 +2,7 @@
 const sb = window.houseStroyClient;
 const $ = id => document.getElementById(id);
 const categories = { photos: "Фотографии (PHOTO)", images: "Дополнительные фотографии", threeD: "3D-визуализации", plans: "Планы этажей", facades: "Фасады" };
-let projects = [], currentId = null, cover = null, media = {images:[],threeD:[],plans:[],facades:[]}, user = null;
+let projects = [], currentId = null, cover = null, media = {images:[],threeD:[],plans:[],facades:[]}, user = null, initializedUserId = null;
 const status = (id, msg, bad=false) => { const el=$(id); if(el){el.textContent=msg;el.style.color=bad?"#b82025":"";} };
 const slugify = s => s.toLowerCase().trim().replace(/ё/g,"e").replace(/[^a-zа-я0-9]+/gi,"-").replace(/^-|-$/g,"") || "house";
 const escapeHtml = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -210,7 +210,7 @@ $("loginForm").onsubmit=async e=>{
  if(error){status("loginStatus","Ошибка входа: "+error.message,true);return;}
  await openWorkspace();
 };
-$("logout").onclick=async()=>{await sb.auth.signOut();location.reload();};
+$("logout").onclick=async()=>{initializedUserId=null;await sb.auth.signOut();location.reload();};
 window.houseStroySaveProject = async function(e){
  e?.preventDefault();
  const btn=$("saveProjectBtn");
@@ -227,5 +227,5 @@ window.houseStroyDeleteProject = async function(e){
 };
 $("new").onclick=clearForm;$("clear").onclick=clearForm;
 $("coverFile")?.addEventListener("change",e=>addFiles("cover",e.target.files));
-setupUploads();sb.auth.onAuthStateChange((_event)=>{setTimeout(openWorkspace,0);});openWorkspace();
+setupUploads();sb.auth.onAuthStateChange((event)=>{if(event==="SIGNED_IN"||event==="SIGNED_OUT"||event==="INITIAL_SESSION"){if(event==="SIGNED_OUT")initializedUserId=null;setTimeout(openWorkspace,0);}});openWorkspace();
 })();
