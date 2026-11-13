@@ -8,7 +8,7 @@ function url(path){return path?sb.storage.from("project-media").getPublicUrl(pat
 function mapRow(row){
  const spec=row.specifications||{},media={images:[],threeD:[],plans:[],facades:[],photos:[]};
  (row.project_media||[]).sort((a,b)=>a.sort_order-b.sort_order).forEach(m=>{if(media[m.category])media[m.category].push(url(m.storage_path));});
- return {id:row.id,slug:row.slug,name:row.title,description:row.description||row.short_description||"",price:row.price||0,totalArea:row.total_area||0,livingArea:row.living_area||0,floors:row.floors||1,bedrooms:row.bedrooms||0,bathrooms:row.bathrooms||0,cover:spec.cover_path?url(spec.cover_path):(spec.cover_url||""),...media};
+ return {id:row.id,slug:row.slug,name:row.title,description:row.description||row.short_description||"",price:row.price||0,totalArea:row.total_area||0,livingArea:row.living_area||0,dimensions:spec.dimensions||"",floors:row.floors||1,bedrooms:row.bedrooms||0,bathrooms:row.bathrooms||0,cover:spec.cover_path?url(spec.cover_path):(spec.cover_url||""),...media};
 }
 async function load(){
  const {data,error}=await sb.from("projects").select("*, project_media(*)").eq("is_published",true).order("sort_order").order("created_at",{ascending:false});
@@ -16,7 +16,7 @@ async function load(){
 }
 function get(){return cache}
 window.HouseProjects={get,load};
-function card(p){return '<a class="card project-card" href="project.html?id='+encodeURIComponent(p.id)+'"><img src="'+esc(p.cover||"")+'" alt="'+esc(p.name)+'" loading="lazy"><div class="card-body"><h3>'+esc(p.name)+'</h3><p>'+esc(p.description)+'</p><div class="project-stats"><div class="project-stat"><strong>'+p.totalArea+' м²</strong><span>Общая площадь</span></div><div class="project-stat"><strong>'+p.livingArea+' м²</strong><span>Жилая площадь</span></div><div class="project-stat"><strong>'+p.floors+'</strong><span>Этажность</span></div><div class="project-stat"><strong>'+p.bedrooms+'</strong><span>Спальни</span></div></div><div class="meta"><b class="price">'+money(p.price)+'</b></div></div></a>'}
+function card(p){return '<a class="card project-card" href="project.html?id='+encodeURIComponent(p.id)+'"><img src="'+esc(p.cover||"")+'" alt="'+esc(p.name)+'" loading="lazy"><div class="card-body"><h3>'+esc(p.name)+'</h3><p>'+esc(p.description)+'</p><div class="project-stats"><div class="project-stat"><strong>'+p.totalArea+' м²</strong><span>Общая площадь</span></div><div class="project-stat"><strong>'+esc(p.dimensions||"—")+'</strong><span>Размеры</span></div><div class="project-stat"><strong>'+p.floors+'</strong><span>Этажность</span></div><div class="project-stat"><strong>🛏️ '+p.bedrooms+'</strong><span>Спальни</span></div><div class="project-stat"><strong>🚿 '+p.bathrooms+'</strong><span>Санузлы</span></div></div><div class="meta"><b class="price">'+money(p.price)+'</b></div></div></a>'}
 function render(){document.querySelectorAll("[data-project-list]").forEach(el=>{el.innerHTML=cache.map(card).join("")||"<p>Опубликованных проектов пока нет.</p>";});}
 function filterSetup(){
  const ids=["areaMin","areaMax","priceMin","priceMax","floorFilter"];if(!document.getElementById("areaMin"))return;
