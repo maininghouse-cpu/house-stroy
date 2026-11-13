@@ -67,5 +67,5 @@ async function videoReviews(){
   return '<article class="review-video-card"><div class="review-video-frame"><iframe src="'+esc(src)+'" title="Видеоотзыв — '+esc(x.title)+' — HOUSE STROY" loading="lazy" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" allowfullscreen></iframe></div><h3>'+esc(x.title)+'</h3><p>'+esc(x.description||"")+'</p></article>';
  }).join("")||"<p>Пока нет опубликованных видеоотзывов.</p>";
 }
-portfolio();videoReviews();
+portfolio();if(!document.querySelector("[data-review-page]"))videoReviews();
 })();
