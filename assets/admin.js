@@ -21,6 +21,35 @@ function renderList(){
  $("projectList").innerHTML=projects.map(p=>'<div class="project-row"><span>'+escapeHtml(p.name)+'<br><small>'+(p.published?"Опубликован":"Черновик")+'</small></span><button class="secondary" type="button" data-edit="'+p.id+'">Изменить</button></div>').join("")||"<p>Проектов пока нет.</p>";
  document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>loadForm(b.dataset.edit));
 }
+const DRAFT_KEY="houseStroyProjectDraft:v2";
+function saveDraft(){
+ try{
+  const fields={};
+  ["name","price","totalArea","livingArea","floors","bedrooms","bathrooms","shortDescription","description"].forEach(id=>fields[id]=$(id)?.value??"");
+  fields.published=!!$("published")?.checked;fields.featured=!!$("featured")?.checked;
+  const clean=item=>item&&!item.file?{id:item.id||null,path:item.path||null,url:item.url||null,title:item.title||""}:null;
+  const snapshot={userId:user?.id||null,currentId,fields,cover:clean(cover),media:Object.fromEntries(Object.keys(categories).map(k=>[k,(media[k]||[]).map(clean).filter(Boolean)])),savedAt:Date.now()};
+  sessionStorage.setItem(DRAFT_KEY,JSON.stringify(snapshot));
+ }catch(err){console.warn("Не удалось сохранить черновик редактора",err);}
+}
+function restoreDraft(){
+ try{
+  const raw=sessionStorage.getItem(DRAFT_KEY);if(!raw)return false;
+  const draft=JSON.parse(raw);if(!draft||draft.userId!==user?.id)return false;
+  if(draft.currentId){
+   const p=projects.find(x=>x.id===draft.currentId);if(!p)return false;
+   loadForm(draft.currentId);
+  }else{currentId=null;cover=null;media={photos:[],images:[],threeD:[],plans:[],facades:[]};$("editor").reset();$("id").value="";}
+  Object.entries(draft.fields||{}).forEach(([id,value])=>{const el=$(id);if(!el)return;if(el.type==="checkbox")el.checked=!!value;else el.value=value??"";});
+  const clean=item=>item?{...item}:null;
+  if(draft.cover)cover=clean(draft.cover);
+  if(draft.media)media=Object.fromEntries(Object.keys(categories).map(k=>[k,(draft.media[k]||[]).map(clean)]));
+  $("delete").disabled=!currentId;
+  renderThumbs("cover");Object.keys(categories).forEach(renderThumbs);
+  status("editorStatus",currentId?"Черновик восстановлен — вы продолжаете редактирование выбранного проекта.":"Черновик нового проекта восстановлен.");
+  return true;
+ }catch(err){console.warn("Не удалось восстановить черновик редактора",err);return false;}
+}
 function clearForm(){
  currentId=null;cover=null;media={photos:[],images:[],threeD:[],plans:[],facades:[]};$("editor").reset();$("id").value="";$("delete").disabled=true;
  renderThumbs("cover");Object.keys(categories).forEach(renderThumbs);status("editorStatus","Новый проект. Заполните характеристики и сохраните.");
@@ -116,7 +145,7 @@ async function saveProject(e){
    if(ids.length){const {error}=await sb.from("project_media").delete().in("id",ids);if(error)throw error;}
    const {error}=await sb.storage.from("project-media").remove(removed);if(error)console.warn("Не удалось удалить старые файлы",error);
   }
-  await loadProjects();loadForm(id);status("editorStatus","Проект сохранён в Supabase. "+(row.is_published?"Он опубликован на сайте.":"Он сохранён как черновик."));
+  await loadProjects();loadForm(id);saveDraft();status("editorStatus","Проект сохранён в Supabase. "+(row.is_published?"Он опубликован на сайте.":"Он сохранён как черновик."));
  }catch(err){console.error(err);status("editorStatus","Ошибка сохранения: "+(err.message||"неизвестная ошибка"),true);}
  finally{if(saveBtn)saveBtn.disabled=false;}
 }
@@ -225,7 +254,7 @@ window.houseStroyDeleteProject = async function(e){
  status("editorStatus","Запущено удаление проекта…");
  try{await deleteProject();}catch(err){console.error(err);status("editorStatus","Ошибка удаления: "+(err.message||String(err)),true);}
 };
-$("new").onclick=clearForm;$("clear").onclick=clearForm;
+$("new").onclick=clearForm;$("clear").onclick=clearForm;\n $("editor").addEventListener("input",saveDraft);$("editor").addEventListener("change",saveDraft);window.addEventListener("beforeunload",saveDraft);
 $("coverFile")?.addEventListener("change",e=>addFiles("cover",e.target.files));
 setupUploads();sb.auth.onAuthStateChange((event)=>{if(event==="SIGNED_IN"||event==="SIGNED_OUT"||event==="INITIAL_SESSION"){if(event==="SIGNED_OUT")initializedUserId=null;setTimeout(openWorkspace,0);}});openWorkspace();
 })();
