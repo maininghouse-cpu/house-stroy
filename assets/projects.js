@@ -8,7 +8,7 @@ function url(path){return path?sb.storage.from("project-media").getPublicUrl(pat
 function mapRow(row){
  const spec=row.specifications||{},media={images:[],threeD:[],plans:[],facades:[],photos:[]};
  (row.project_media||[]).sort((a,b)=>a.sort_order-b.sort_order).forEach(m=>{if(media[m.category])media[m.category].push(url(m.storage_path));});
- return {id:row.id,slug:row.slug,name:row.title,description:row.description||row.short_description||"",price:row.price||0,totalArea:row.total_area||0,livingArea:row.living_area||0,dimensions:spec.dimensions||"",floors:row.floors||1,bedrooms:row.bedrooms||0,bathrooms:row.bathrooms||0,cover:spec.cover_path?url(spec.cover_path):(spec.cover_url||""),...media};
+ return {id:row.id,slug:row.slug,name:row.title,description:row.description||row.short_description||"",price:row.price||0,totalArea:row.total_area||0,livingArea:row.living_area||0,dimensions:spec.dimensions||"",floors:row.floors||1,bedrooms:row.bedrooms||0,bathrooms:row.bathrooms||0,balconies:Number(spec.balconies??row.balconies??0),terraces:Number(spec.terraces??row.terraces??0),cover:spec.cover_path?url(spec.cover_path):(spec.cover_url||""),...media};
 }
 async function load(){
  const {data,error}=await sb.from("projects").select("*, project_media(*)").eq("is_published",true).order("sort_order").order("created_at",{ascending:false});
