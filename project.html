@@ -103,9 +103,9 @@
 @media(max-width:560px){.project-info-tabs{gap:7px}.project-info-tab{flex:1 1 auto;padding:12px 10px;font-size:12px}.project-info-specs{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.project-info-spec{padding:13px}.project-package-grid{grid-template-columns:1fr}.project-escrow{grid-template-columns:1fr;padding:18px}}
 
 </style>
-<link rel="stylesheet" href="assets/header-size.css?v=20261112-1"></head>
+<link rel="stylesheet" href="assets/header-size.css?v=20261112-1"><link rel="stylesheet" href="assets/reviews-dropdown.css?v=20261114-fix2"></head>
 <body>
-<header><a class="brand" href="index.html">⌂ <b>HOUSE</b> STROY</a><nav class="nav"><a href="index.html">Главная</a><a class="active" href="projects.html">Проекты</a><a href="portfolio.html">Портфолио</a><a href="reviews.html">Отзывы</a><a href="contacts.html">Контакты</a></nav><div class="head-actions"><div class="tel"><a href="tel:+79251234520">+7 (925) 12345-20</a><br><a href="tel:+79251234530">+7 (925) 12345-30</a></div><button class="theme" type="button">☾ Тёмная тема</button></div></header>
+<header><a class="brand" href="index.html">⌂ <b>HOUSE</b> STROY</a><nav class="nav"><a href="index.html">Главная</a><a class="active" href="projects.html">Проекты</a><a href="portfolio.html">Портфолио</a><div class="nav-dropdown"><a class="nav-dropdown-main" href="reviews.html?view=video">Видеоотзывы</a><button class="nav-dropdown-toggle" type="button" aria-label="Открыть подменю видеоотзывов" aria-expanded="false">⌄</button><div class="nav-submenu"><a href="reviews.html?view=portfolio">Обзор домов</a></div></div><a href="contacts.html">Контакты</a></nav><div class="head-actions"><div class="tel"><a href="tel:+79251234520">+7 (925) 12345-20</a><br><a href="tel:+79251234530">+7 (925) 12345-30</a></div><button class="theme" type="button">☾ Тёмная тема</button></div></header>
 <main class="detail">
 <a class="back" href="projects.html">← Все проекты</a>
 <div id="content">Загрузка проекта…</div>
@@ -245,4 +245,4 @@ function renderGallery(){
 
  }catch(e){console.error(e);root.innerHTML="<h1>Не удалось загрузить проект</h1><p>Попробуйте обновить страницу.</p>";}})();
 </script>
-<script src="assets/legal.js?v=20261112-1"></script></body></html>
+<script src="assets/legal.js?v=20261112-1"></script><script src="assets/reviews-dropdown.js?v=20261114-fix2"></script></body></html>
