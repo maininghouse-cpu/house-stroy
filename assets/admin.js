@@ -279,7 +279,8 @@ window.houseStroyDeleteProject = async function(e){
  status("editorStatus","Запущено удаление проекта…");
  try{await deleteProject();}catch(err){console.error(err);status("editorStatus","Ошибка удаления: "+(err.message||String(err)),true);}
 };
-$("new").onclick=clearForm;$("clear").onclick=clearForm;\n $("editor").addEventListener("input",saveDraft);$("editor").addEventListener("change",saveDraft);window.addEventListener("beforeunload",saveDraft);
+$("new").onclick=clearForm;$("clear").onclick=clearForm;
+ $("editor").addEventListener("input",saveDraft);$("editor").addEventListener("change",saveDraft);window.addEventListener("beforeunload",saveDraft);
 $("coverFile")?.addEventListener("change",e=>addFiles("cover",e.target.files));
 setupUploads();sb.auth.onAuthStateChange((event)=>{if(event==="PASSWORD_RECOVERY"){$("loginPanel").classList.add("hidden");$("workspace").classList.add("hidden");$("resetPanel").classList.remove("hidden");status("resetStatus","Введите новый пароль для учётной записи.");return;}if(event==="SIGNED_IN"||event==="SIGNED_OUT"||event==="INITIAL_SESSION"){if(event==="SIGNED_OUT")initializedUserId=null;setTimeout(openWorkspace,0);}});if(new URLSearchParams(location.search).get("mode")==="reset"){$("loginPanel").classList.add("hidden");$("resetPanel").classList.remove("hidden");}openWorkspace();
 })();
