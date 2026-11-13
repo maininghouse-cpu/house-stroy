@@ -236,6 +236,28 @@ async function openWorkspace(){
  setupUploads();initializedUserId=user.id;$("importZipBtn")?.addEventListener("click",importProjectZip);
  try{await loadProjects();if(!restoreDraft())clearForm();}catch(err){status("sessionStatus","Не удалось загрузить проекты: "+err.message,true);}
 }
+$("forgotPasswordBtn").onclick=async()=>{
+ const email=$("loginEmail").value.trim();
+ if(!email){status("loginStatus","Укажите email, на который отправить ссылку для восстановления.",true);$("loginEmail").focus();return;}
+ status("loginStatus","Отправляю ссылку для восстановления…");
+ const redirectTo=location.origin+location.pathname+"?mode=reset";
+ const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
+ if(error){status("loginStatus","Не удалось отправить письмо: "+error.message,true);return;}
+ status("loginStatus","Если адрес зарегистрирован, на него отправлено письмо со ссылкой для восстановления пароля. Проверьте также папку «Спам».");
+};
+$("resetPasswordForm").onsubmit=async e=>{
+ e.preventDefault();
+ const password=$("newPassword").value,confirmPassword=$("confirmPassword").value;
+ if(password.length<8){status("resetStatus","Пароль должен содержать не менее 8 символов.",true);return;}
+ if(password!==confirmPassword){status("resetStatus","Пароли не совпадают.",true);return;}
+ status("resetStatus","Сохраняю новый пароль…");
+ const {error}=await sb.auth.updateUser({password});
+ if(error){status("resetStatus","Не удалось изменить пароль: "+error.message,true);return;}
+ $("resetPasswordForm").reset();$("resetPanel").classList.add("hidden");
+ status("loginStatus","Пароль успешно изменён. Теперь войдите с новым паролем.");
+ $("loginPanel").classList.remove("hidden");
+ try{history.replaceState(null,"",location.pathname);}catch{}
+};
 $("loginForm").onsubmit=async e=>{
  e.preventDefault();status("loginStatus","Выполняется вход…");
  const {error}=await sb.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});
@@ -259,5 +281,5 @@ window.houseStroyDeleteProject = async function(e){
 };
 $("new").onclick=clearForm;$("clear").onclick=clearForm;\n $("editor").addEventListener("input",saveDraft);$("editor").addEventListener("change",saveDraft);window.addEventListener("beforeunload",saveDraft);
 $("coverFile")?.addEventListener("change",e=>addFiles("cover",e.target.files));
-setupUploads();sb.auth.onAuthStateChange((event)=>{if(event==="SIGNED_IN"||event==="SIGNED_OUT"||event==="INITIAL_SESSION"){if(event==="SIGNED_OUT")initializedUserId=null;setTimeout(openWorkspace,0);}});openWorkspace();
+setupUploads();sb.auth.onAuthStateChange((event)=>{if(event==="PASSWORD_RECOVERY"){$("loginPanel").classList.add("hidden");$("workspace").classList.add("hidden");$("resetPanel").classList.remove("hidden");status("resetStatus","Введите новый пароль для учётной записи.");return;}if(event==="SIGNED_IN"||event==="SIGNED_OUT"||event==="INITIAL_SESSION"){if(event==="SIGNED_OUT")initializedUserId=null;setTimeout(openWorkspace,0);}});if(new URLSearchParams(location.search).get("mode")==="reset"){$("loginPanel").classList.add("hidden");$("resetPanel").classList.remove("hidden");}openWorkspace();
 })();
