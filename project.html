@@ -30,11 +30,15 @@
 .gallery-controls button,.project-nav a{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:30px;padding:11px 17px;cursor:pointer;font:600 13px Inter}
 .gallery-controls button:disabled{opacity:.35;cursor:default}
 .gallery-count{font-size:12px;color:var(--muted);text-align:center}
-.project-nav{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:42px 0 20px}
-.project-nav a{display:block;border-radius:14px;padding:18px 20px}
-.project-nav a:last-child{text-align:right}
-.project-nav small{display:block;color:var(--muted);font-size:11px;margin-bottom:7px}
-.project-nav strong{font-size:14px}
+.project-nav{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:42px 0 20px}
+.project-nav a{display:grid;grid-template-columns:132px minmax(0,1fr);gap:17px;align-items:center;min-height:116px;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--text);text-decoration:none;transition:border-color .2s,transform .2s,box-shadow .2s}
+.project-nav a:hover{border-color:#b82025;transform:translateY(-2px);box-shadow:0 10px 26px #00000010}
+.project-nav a:last-child{grid-template-columns:minmax(0,1fr) 132px;text-align:right}
+.project-nav .project-nav-image{display:block;width:132px;height:92px;object-fit:cover;border-radius:10px;background:var(--bg)}
+.project-nav small{display:block;color:var(--muted);font-size:11px;margin-bottom:8px}
+.project-nav strong{display:block;font:800 15px/1.35 Manrope,Arial,sans-serif}
+.project-nav .project-nav-empty{border:0;background:transparent}
+@media(max-width:650px){.project-nav{grid-template-columns:1fr;gap:10px}.project-nav a{grid-template-columns:104px minmax(0,1fr);min-height:94px}.project-nav a:last-child{grid-template-columns:minmax(0,1fr) 104px}.project-nav .project-nav-image{width:104px;height:76px}.project-nav strong{font-size:13px}}
 #lightbox{position:fixed;inset:0;background:rgba(0,0,0,.94);display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:999;padding:64px 76px 18px}
 #lightbox #lightboxImage{display:block;flex:1 1 auto;min-height:0;width:auto;height:auto;max-width:100%;max-height:calc(100vh - 190px);object-fit:contain}
 #lightbox button{position:absolute;border:1px solid #ffffff99;background:rgba(35,35,35,.9);color:#fff;border-radius:50%;width:44px;height:44px;font-size:24px;cursor:pointer;z-index:1003}
@@ -196,7 +200,7 @@ function renderGallery(){
  root.innerHTML='<div class="detail-hero"><img id="cover" src="'+esc(project.cover)+'" alt="'+esc(project.name)+'"><div><div class="eyebrow">HOUSE STROY / ПРОЕКТ</div><h1>'+esc(project.name)+'</h1><p>'+esc(project.description)+'</p><h2>'+Number(project.price||0).toLocaleString("ru-RU")+' ₽</h2><div class="specs"><div class="spec"><b>'+project.totalArea+' м²</b><br>Общая площадь</div><div class="spec"><b>'+project.livingArea+' м²</b><br>Жилая площадь</div><div class="spec"><b>'+project.floors+'</b><br>Этажность</div><div class="spec"><b>'+project.bedrooms+'</b><br>Спальни</div></div></div></div>'+
  '<div class="tabs"><button data-tab="threeD">3D</button><button data-tab="plans">Планы</button><button data-tab="facades">Фасады</button><button data-tab="photos">Фотографии</button></div>'+
  '<div class="gallery-wrap"><div class="gallery" id="gallery"></div><div class="thumb-strip" id="thumbStrip" aria-label="Миниатюры всех изображений"></div><div class="gallery-controls" id="galleryControls"><button id="galleryPrev" type="button" aria-label="Предыдущее изображение">← Назад</button><span class="gallery-count" id="galleryCount"></span><button id="galleryNext" type="button" aria-label="Следующее изображение">Вперёд →</button></div></div>'+
- '<nav class="project-nav" aria-label="Навигация по проектам">'+(prev?'<a href="project.html?id='+encodeURIComponent(prev.id)+'"><small>← Предыдущий проект</small><strong>'+esc(prev.name)+'</strong></a>':'<span></span>')+(next?'<a href="project.html?id='+encodeURIComponent(next.id)+'"><small>Следующий проект →</small><strong>'+esc(next.name)+'</strong></a>':'<span></span>')+'</nav>';
+ '<nav class="project-nav" aria-label="Навигация по проектам">'+(prev?'<a href="project.html?id='+encodeURIComponent(prev.id)+'"><img class="project-nav-image" src="'+esc(prev.cover||prev.photos?.[0]||"")+'" alt="'+esc(prev.name)+'" loading="lazy"><span><small>← Предыдущий проект</small><strong>'+esc(prev.name)+'</strong></span></a>':'<span class="project-nav-empty"></span>')+(next?'<a href="project.html?id='+encodeURIComponent(next.id)+'"><span><small>Следующий проект →</small><strong>'+esc(next.name)+'</strong></span><img class="project-nav-image" src="'+esc(next.cover||next.photos?.[0]||"")+'" alt="'+esc(next.name)+'" loading="lazy"></a>':'<span class="project-nav-empty"></span>')+'</nav>';
  document.getElementById("cover").onclick=()=>{if(project.cover)openLightbox(0,[{src:project.cover,category:"cover"},...allSlides.filter(s=>s.src!==project.cover)]);};
  renderGallery();
 
