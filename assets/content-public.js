@@ -31,22 +31,6 @@ function openViewer(images,index){
 }
 function closeViewer(){if(!viewer)return;viewer.hidden=true;document.body.classList.remove("lightbox-open");}
 
-function vkEmbedUrl(raw){
- try{
-  const u=new URL(raw);if(!/(^|\\.)vkvideo\\.ru$|(^|\\.)vk\\.com$/i.test(u.hostname))return "";
-  const m=u.pathname.match(/video(-?\\d+)_(\\d+)/);if(m)return "https://vk.com/video_ext.php?oid="+m[1]+"&id="+m[2]+"&hd=2";
-  if(u.pathname==="/video_ext.php"&&u.searchParams.get("oid")&&u.searchParams.get("id"))return u.href;
- }catch{}return "";
-}
-async function videoReviews(){
- const root=document.querySelector("[data-video-reviews]");if(!root)return;
- const {data,error}=await sb.from("video_reviews").select("id,title,video_url,description").eq("is_published",true).order("sort_order").order("created_at",{ascending:false});
- if(error){console.error("Не удалось загрузить видеоотзывы:",error);root.innerHTML="<p>Не удалось загрузить видеоотзывы. Обновите страницу позже.</p>";return;}
- root.innerHTML=(data||[]).map(x=>{
-  const src=vkEmbedUrl(x.video_url);if(!src)return "";
-  return '<article class="review-video-card"><div class="review-video-frame"><iframe src="'+esc(src)+'" title="Видеоотзыв — '+esc(x.title)+' — HOUSE STROY" loading="lazy" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" allowfullscreen></iframe></div><h3>'+esc(x.title)+'</h3><p>'+esc(x.description||"")+'</p></article>';
- }).join("")||"<p>Видеоотзывы скоро появятся.</p>";
-}
 async function portfolio(){
  const root=document.querySelector("[data-portfolio-list]");if(!root)return;
  const {data,error}=await sb.from("portfolio_items").select("*").eq("is_published",true).order("sort_order",{ascending:true}).order("created_at",{ascending:false});if(error){console.error("Не удалось загрузить портфолио:",error);root.innerHTML="<p>Не удалось загрузить проекты портфолио. Обновите страницу позже.</p>";return;}
@@ -83,5 +67,5 @@ async function videoReviews(){
   return '<article class="review-video-card"><div class="review-video-frame"><iframe src="'+esc(src)+'" title="Видеоотзыв — '+esc(x.title)+' — HOUSE STROY" loading="lazy" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" allowfullscreen></iframe></div><h3>'+esc(x.title)+'</h3><p>'+esc(x.description||"")+'</p></article>';
  }).join("")||"<p>Пока нет опубликованных видеоотзывов.</p>";
 }
-portfolio();videoReviews();videoReviews();
+portfolio();videoReviews();
 })();
