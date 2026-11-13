@@ -43,7 +43,7 @@ $("reviewsPageModeForm").addEventListener("submit",async e=>{
  e.preventDefault();const btn=$("reviewsPageModeForm").querySelector('[type="submit"]');btn.disabled=true;
  try{
   const mode=$("reviewsPageMode").value;
-  const {error}=await sb.from("site_settings").upsert({key:"reviews_page_mode",value:JSON.stringify(mode),updated_at:new Date().toISOString()},{onConflict:"key"});
+  const {error}=await sb.from("site_settings").upsert({key:"reviews_page_mode",value:mode,updated_at:new Date().toISOString()},{onConflict:"key"});
   if(error)throw error;
   sayMode("Режим сохранён. Страница и название пункта меню обновятся для посетителей сайта.");
  }catch(err){sayMode("Не удалось сохранить режим: "+err.message,true);}
