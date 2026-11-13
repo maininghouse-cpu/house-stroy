@@ -45,10 +45,5 @@ async function portfolio(){
   openViewer(urls.map((url)=>({url,title:x.title})),Number(btn.dataset.photo));
  }));
 }
-async function reviews(){
- const root=document.querySelector("[data-reviews-list]");if(!root)return;
- const {data,error}=await sb.from("reviews").select("*").eq("is_published",true).order("sort_order").order("created_at",{ascending:false});if(error||!data)return;
- root.innerHTML=data.map(x=>'<article class="review"><div class="stars" aria-label="Оценка '+x.rating+' из 5">'+("★".repeat(Math.max(0,Math.min(5,Number(x.rating)||0))))+("☆".repeat(5-Math.max(0,Math.min(5,Number(x.rating)||0))))+'</div><blockquote>«'+esc(x.content)+'»</blockquote><small>'+esc(x.author)+(x.project_label?' · '+esc(x.project_label):'')+'</small></article>').join("")||"<p>Пока нет опубликованных отзывов.</p>";
-}
-portfolio();reviews();
+portfolio();
 })();
