@@ -45,5 +45,26 @@ async function portfolio(){
   openViewer(urls.map((url)=>({url,title:x.title})),Number(btn.dataset.photo));
  }));
 }
-portfolio();
+
+function vkEmbedUrl(value){
+ try{
+  const u=new URL(value);
+  if(u.hostname.endsWith("vkvideo.ru")||u.hostname.endsWith("vk.com")||u.hostname.endsWith("vk.ru")){
+   if(u.pathname.includes("video_ext.php"))return u.href;
+   const m=u.pathname.match(/video(-?\\d+)_(\\d+)/);
+   if(m)return "https://vk.com/video_ext.php?oid="+encodeURIComponent(m[1])+"&id="+encodeURIComponent(m[2])+"&hd=2";
+  }
+ }catch{}
+ return null;
+}
+async function videoReviews(){
+ const root=document.querySelector("[data-video-reviews]");if(!root)return;
+ const {data,error}=await sb.from("video_reviews").select("id,title,video_url,description").eq("is_published",true).order("sort_order",{ascending:true}).order("created_at",{ascending:false});
+ if(error){console.error("Не удалось загрузить видеоотзывы:",error);root.innerHTML="<p>Не удалось загрузить видеоотзывы. Обновите страницу позже.</p>";return;}
+ root.innerHTML=(data||[]).map(x=>{
+  const src=vkEmbedUrl(x.video_url);if(!src)return "";
+  return '<article class="review-video-card"><div class="review-video-frame"><iframe src="'+esc(src)+'" title="Видеоотзыв — '+esc(x.title)+' — HOUSE STROY" loading="lazy" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" allowfullscreen></iframe></div><h3>'+esc(x.title)+'</h3><p>'+esc(x.description||"")+'</p></article>';
+ }).join("")||"<p>Пока нет опубликованных видеоотзывов.</p>";
+}
+portfolio();videoReviews();
 })();
