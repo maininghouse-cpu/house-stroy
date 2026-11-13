@@ -2,8 +2,8 @@
 const sb=window.houseStroyClient;if(!sb)return;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const root=document.querySelector("[data-review-content]");
-const labels=document.querySelectorAll('a[href="reviews.html"]');
-function setLabels(mode){labels.forEach(a=>a.textContent=mode==="portfolio"?"Обзор домов":"Видеоотзывы");}
+const labels=document.querySelectorAll('a[href^="reviews.html"]');
+function setLabels(mode){labels.forEach(a=>{a.textContent=a.href.includes('view=portfolio')?'Обзор домов':'Видеоотзывы';});}
 function showLightbox(urls,title){
  let index=0,overlay=document.querySelector("#houseReviewLightbox");
  if(!overlay){overlay=document.createElement("div");overlay.id="houseReviewLightbox";overlay.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99999;display:none;align-items:center;justify-content:center;padding:24px";overlay.innerHTML='<button type="button" aria-label="Закрыть" data-close style="position:absolute;right:24px;top:12px;color:white;background:none;border:0;font-size:42px;cursor:pointer">×</button><button type="button" data-prev aria-label="Назад" style="position:absolute;left:16px;color:white;background:none;border:0;font-size:48px;cursor:pointer">‹</button><figure style="margin:0;text-align:center;max-width:90vw;max-height:90vh"><img style="max-width:86vw;max-height:78vh;object-fit:contain"><figcaption style="color:white;padding:12px"></figcaption></figure><button type="button" data-next aria-label="Вперёд" style="position:absolute;right:16px;color:white;background:none;border:0;font-size:48px;cursor:pointer">›</button>';document.body.appendChild(overlay);
@@ -15,7 +15,8 @@ function showLightbox(urls,title){
 async function init(){
  const {data,error}=await sb.from("site_settings").select("value").eq("key","reviews_page_mode").maybeSingle();
  if(error){console.warn("Не удалось получить режим страницы отзывов:",error);return;}
- const mode=data?.value==="portfolio"?"portfolio":"video";
+ const requested=new URLSearchParams(location.search).get("view");
+ const mode=requested==="portfolio"?"portfolio":requested==="video"?"video":(data?.value==="portfolio"?"portfolio":"video");
  setLabels(mode);
  if(!root)return;
  const hero=document.querySelector("#reviewsHeroTitle"),heading=document.querySelector("#reviewsSectionTitle");
