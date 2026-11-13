@@ -51,6 +51,7 @@ function restoreDraft(){
  }catch(err){console.warn("Не удалось восстановить черновик редактора",err);return false;}
 }
 function clearForm(){
+ try{sessionStorage.removeItem(DRAFT_KEY);}catch{}
  currentId=null;cover=null;media={photos:[],images:[],threeD:[],plans:[],facades:[]};$("editor").reset();$("id").value="";$("delete").disabled=true;
  renderThumbs("cover");Object.keys(categories).forEach(renderThumbs);status("editorStatus","Новый проект. Заполните характеристики и сохраните.");
 }
@@ -64,7 +65,7 @@ function loadForm(id){
  const p=projects.find(x=>x.id===id);if(!p)return;currentId=p.id;cover=p.cover?{...p.cover}:null;
  media=Object.fromEntries(Object.keys(categories).map(k=>[k,[...(p.media[k]||[])].map(x=>({...x}))]));
  $("id").value=p.id;$("name").value=p.name;$("price").value=p.price;$("totalArea").value=p.totalArea;$("livingArea").value=p.livingArea;$("floors").value=p.floors;$("bedrooms").value=p.bedrooms;$("bathrooms").value=p.bathrooms;$("shortDescription").value=p.shortDescription;$("description").value=p.description;$("published").checked=p.published;$("featured").checked=p.featured;$("delete").disabled=false;
- renderThumbs("cover");Object.keys(categories).forEach(renderThumbs);status("editorStatus","Редактирование проекта. Сохраните изменения после проверки.");
+ renderThumbs("cover");Object.keys(categories).forEach(renderThumbs);status("editorStatus","Редактирование проекта. Сохраните изменения после проверки.");saveDraft();
 }
 async function compressImage(file){
  if(!file.type.startsWith("image/"))throw new Error("Разрешены только изображения.");
@@ -225,13 +226,14 @@ async function importProjectZip(){
 
 async function openWorkspace(){
  const {data:{user:authUser},error}=await sb.auth.getUser();
- if(error||!authUser){$("loginPanel").classList.remove("hidden");$("workspace").classList.add("hidden");return;}
+ if(error||!authUser){initializedUserId=null;$("loginPanel").classList.remove("hidden");$("workspace").classList.add("hidden");return;}
  user=authUser;
  if(user.app_metadata?.role!=="admin"){await sb.auth.signOut();status("loginStatus","У этой учётной записи нет роли администратора.",true);return;}
+ if(initializedUserId===user.id){$("loginPanel").classList.add("hidden");$("workspace").classList.remove("hidden");return;}
  $("loginPanel").classList.add("hidden");$("workspace").classList.remove("hidden");
  $("sessionStatus").textContent="Вы вошли как "+user.email+" · роль admin";
- setupUploads();clearForm();$("importZipBtn")?.addEventListener("click",importProjectZip);
- try{await loadProjects();}catch(err){status("sessionStatus","Не удалось загрузить проекты: "+err.message,true);}
+ setupUploads();initializedUserId=user.id;$("importZipBtn")?.addEventListener("click",importProjectZip);
+ try{await loadProjects();if(!restoreDraft())clearForm();}catch(err){status("sessionStatus","Не удалось загрузить проекты: "+err.message,true);}
 }
 $("loginForm").onsubmit=async e=>{
  e.preventDefault();status("loginStatus","Выполняется вход…");
