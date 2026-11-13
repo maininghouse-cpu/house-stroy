@@ -30,6 +30,26 @@ $("videoReviewsAdminForm").addEventListener("submit",async e=>{
  finally{btn.disabled=false;}
 });
 $("videoReviewClear").addEventListener("click",clear);
-async function init(){const {data:{user},error}=await sb.auth.getUser();if(error||!user||user.app_metadata?.role!=="admin")return;try{await load();}catch(err){say("Не удалось загрузить видеоотзывы: "+err.message,true);}}
+
+async function loadPageMode(){
+ const {data,error}=await sb.from("site_settings").select("value").eq("key","reviews_page_mode").maybeSingle();
+ if(error)throw error;
+ const mode=data?.value==="portfolio"?"portfolio":"video";
+ $("reviewsPageMode").value=mode;
+ sayMode(mode==="portfolio"?"На сайте отображается обзор построенных домов.":"На сайте отображаются видеоотзывы заказчиков.");
+}
+function sayMode(message,bad=false){const el=$("reviewsPageModeStatus");if(el){el.textContent=message;el.style.color=bad?"#b82025":"";}}
+$("reviewsPageModeForm").addEventListener("submit",async e=>{
+ e.preventDefault();const btn=$("reviewsPageModeForm").querySelector('[type="submit"]');btn.disabled=true;
+ try{
+  const mode=$("reviewsPageMode").value;
+  const {error}=await sb.from("site_settings").upsert({key:"reviews_page_mode",value:JSON.stringify(mode),updated_at:new Date().toISOString()},{onConflict:"key"});
+  if(error)throw error;
+  sayMode("Режим сохранён. Страница и название пункта меню обновятся для посетителей сайта.");
+ }catch(err){sayMode("Не удалось сохранить режим: "+err.message,true);}
+ finally{btn.disabled=false;}
+});
+
+async function init(){const {data:{user},error}=await sb.auth.getUser();if(error||!user||user.app_metadata?.role!=="admin")return;try{await Promise.all([load(),loadPageMode()]);}catch(err){say("Не удалось загрузить настройки или видеоотзывы: "+err.message,true);}}
 sb.auth.onAuthStateChange(()=>setTimeout(init,0));init();
 })();
