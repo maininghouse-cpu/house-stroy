@@ -24,15 +24,11 @@ async function init(){
   document.title="Обзор построенных домов — HOUSE STROY";
   if(hero)hero.textContent="Построенные дома";
   if(heading)heading.textContent="Обзор реализованных объектов";
-  root.innerHTML='<p class="muted">Загружаем построенные дома…</p>';
-  const {data:items,error:loadError}=await sb.from("portfolio_items").select("id,title,description,image_url,gallery_urls,area,style").eq("is_published",true).order("sort_order",{ascending:true}).order("created_at",{ascending:false});
-  if(loadError){root.innerHTML="<p>Не удалось загрузить объекты. Обновите страницу позже.</p>";console.error(loadError);return;}
-  root.innerHTML=(items||[]).map((x,i)=>{
-   const photos=(x.gallery_urls&&x.gallery_urls.length?x.gallery_urls:(x.image_url?[x.image_url]:[]));
-   const photo=photos[0];
-   return '<article class="review-video-card house-overview-card">'+(photo?'<button type="button" class="house-overview-photo" data-house="'+i+'" style="display:block;width:100%;padding:0;border:0;background:none;cursor:zoom-in"><img src="'+esc(photo)+'" alt="'+esc(x.title)+'" loading="lazy" style="width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:14px"></button>':'')+'<h3>'+esc(x.title)+'</h3><p>'+esc(x.description||"")+'</p><div class="meta">'+(x.area?'<span>'+esc(x.area)+' м²</span>':'')+(x.style?'<span>'+esc(x.style)+'</span>':'')+'</div>'+(photos.length>1?'<button type="button" class="secondary house-overview-gallery" data-house="'+i+'">Смотреть фотографии · '+photos.length+'</button>':'')+'</article>';
-  }).join("")||"<p>Построенные дома скоро появятся здесь.</p>";
-  root.querySelectorAll("[data-house]").forEach(btn=>btn.addEventListener("click",()=>{const x=items[Number(btn.dataset.house)];const urls=x.gallery_urls&&x.gallery_urls.length?x.gallery_urls:(x.image_url?[x.image_url]:[]);if(urls.length)showLightbox(urls,x.title);}));
+  root.innerHTML='<p class="muted">Загружаем видеообзоры построенных домов…</p>';
+  const {data:items,error:loadError}=await sb.from("house_overview_videos").select("id,title,video_url,description").eq("is_published",true).order("sort_order",{ascending:true}).order("created_at",{ascending:false});
+  if(loadError){root.innerHTML="<p>Не удалось загрузить видеообзоры. Обновите страницу позже.</p>";console.error(loadError);return;}
+  const embed=value=>{try{const u=new URL(value);if(u.hostname.endsWith("vkvideo.ru")||u.hostname.endsWith("vk.com")||u.hostname.endsWith("vk.ru")){if(u.pathname.includes("video_ext.php"))return u.href;const m=u.pathname.match(/video(-?\d+)_(\d+)/);if(m)return "https://vk.com/video_ext.php?oid="+encodeURIComponent(m[1])+"&id="+encodeURIComponent(m[2])+"&hd=2";}}catch{}return null;};
+  root.innerHTML=(items||[]).map(x=>{const src=embed(x.video_url);return src?'<article class="review-video-card"><div class="review-video-frame"><iframe src="'+esc(src)+'" title="Обзор дома — '+esc(x.title)+'" loading="lazy" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe></div><h3>'+esc(x.title)+'</h3><p>'+esc(x.description||"")+'</p></article>':"";}).join("")||"<p>Видеообзоры построенных домов скоро появятся здесь.</p>";
  }else{
   document.title="Видеоотзывы — HOUSE STROY";
   if(hero)hero.textContent="Отзывы клиентов";
