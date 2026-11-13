@@ -19,7 +19,7 @@
 <div class="layout" data-admin-section="projects"><aside class="panel"><button class="primary" id="new">＋ Добавить проект</button><h3>Проекты</h3><div id="projectList"></div><hr><button class="secondary" id="logout">Выйти</button><p class="muted">Изменения сохраняются в Supabase и становятся доступны на сайте после публикации.</p></aside>
 <section class="panel"><form id="editor"><input type="hidden" id="id"><div class="fields">
 <label>Название проекта<input id="name" required maxlength="140"></label><label>Стоимость, ₽<input id="price" type="number" min="0"></label>
-<label>Общая площадь, м²<input id="totalArea" type="number" min="0" step="0.1"></label><label>Жилая площадь, м²<input id="livingArea" type="number" min="0" step="0.1"></label>
+<label>Общая площадь, м²<input id="totalArea" type="number" min="0" step="0.1"></label><label>Размеры дома<input id="dimensions" type="text" maxlength="60" placeholder="Например, 8 × 10 м"></label>
 <label>Этажность<select id="floors"><option value="1">1 этаж</option><option value="2">2 этажа</option><option value="3">3 этажа</option></select></label><label>Спальни<input id="bedrooms" type="number" min="0"></label>
 <label>Ванные комнаты<input id="bathrooms" type="number" min="0"></label><label>Краткое описание<input id="shortDescription" maxlength="240"></label>
 <label class="wide">Описание<textarea id="description"></textarea></label></div>
