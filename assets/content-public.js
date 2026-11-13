@@ -51,7 +51,7 @@ function vkEmbedUrl(value){
   const u=new URL(value);
   if(u.hostname.endsWith("vkvideo.ru")||u.hostname.endsWith("vk.com")||u.hostname.endsWith("vk.ru")){
    if(u.pathname.includes("video_ext.php"))return u.href;
-   const m=u.pathname.match(/video(-?\\d+)_(\\d+)/);
+   const m=u.pathname.match(/video(-?\d+)_(\d+)/);
    if(m)return "https://vk.com/video_ext.php?oid="+encodeURIComponent(m[1])+"&id="+encodeURIComponent(m[2])+"&hd=2";
   }
  }catch{}
