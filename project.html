@@ -102,6 +102,12 @@
 @media(max-width:800px){.project-info-specs{grid-template-columns:repeat(3,minmax(0,1fr))}.project-package-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.project-info-tabs{gap:7px}.project-info-tab{flex:1 1 auto;padding:12px 10px;font-size:12px}.project-info-specs{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.project-info-spec{padding:13px}.project-package-grid{grid-template-columns:1fr}.project-escrow{grid-template-columns:1fr;padding:18px}}
 
+
+/* Theme-aware project specification cards: keep values readable in Night mode. */
+.specs .spec{background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--line);}
+.specs .spec-label{color:var(--muted)!important;}
+.specs .spec-value,.specs .spec b{color:var(--text)!important;}
+.specs .spec-icon{stroke:currentColor;}
 </style>
 <link rel="stylesheet" href="assets/header-size.css?v=20261112-1"><link rel="stylesheet" href="assets/reviews-dropdown.css?v=20261114-fix2"></head>
 <body>
