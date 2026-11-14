@@ -5,15 +5,16 @@
 <title>Проект — HOUSE STROY</title><link rel="stylesheet" href="assets/style.css?v=20261112-seasons">
 <style>
 .detail{max-width:1120px;margin:50px auto;padding:0 24px}
-.detail-hero{display:grid;grid-template-columns:1.3fr 1fr;gap:28px}
-.detail-hero>img{width:100%;height:390px;object-fit:cover;border-radius:18px;cursor:zoom-in}
+.detail-hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:28px;align-items:start}
+.detail-hero>img{display:block;width:100%;max-width:100%;min-width:0;height:390px;object-fit:cover;border-radius:18px;cursor:zoom-in}
+.detail-hero>div{min-width:0;max-width:100%}
 .specs-heading{font:800 25px/1.2 Manrope,Arial,sans-serif;margin:24px 0 0}
-.specs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px 26px;margin:20px 0 30px;align-items:center}
+.specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;max-width:100%;gap:18px 22px;margin:20px 0 30px;align-items:center;min-width:0}
 .spec{background:transparent;padding:8px 0;min-height:0;border-radius:0;font-size:16px;line-height:1.35;display:flex;flex-direction:column;gap:10px;min-width:0}
 .spec-label{color:var(--muted);font-size:15px}
 .spec-value{display:flex;align-items:center;gap:13px;font:800 29px/1.1 Manrope,Arial,sans-serif;color:var(--text)}
 .spec-icon{width:54px;height:54px;flex:0 0 54px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.spec.primary{grid-column:span 2;flex-direction:row;align-items:center;gap:18px;border-bottom:1px solid var(--line);padding-bottom:16px}
+.spec.primary{grid-column:auto;flex-direction:row;align-items:center;gap:10px;border-bottom:1px solid var(--line);padding:8px 0 14px;min-width:0}
 .spec.primary .spec-label{font-size:16px}
 .spec.primary .spec-value{font-size:23px}.spec.primary .spec-label,.spec.primary .spec-value{white-space:nowrap}.spec.primary .spec-value{flex:0 0 auto}
 @media(max-width:750px){.specs{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 18px;margin:18px 0 24px}.spec{padding:8px 0;font-size:15px}.spec-value{font-size:25px;gap:9px}.spec-icon{width:44px;height:44px;flex-basis:44px}.spec.primary{grid-column:span 1;flex-direction:column;align-items:flex-start;gap:8px;padding-bottom:10px}.spec.primary .spec-value{font-size:21px}}
@@ -108,6 +109,13 @@
 .specs .spec-label{color:var(--muted)!important;}
 .specs .spec-value,.specs .spec b{color:var(--text)!important;}
 .specs .spec-icon{stroke:currentColor;}
+
+/* Keep all four key metrics inside the text column beside the project image. */
+.specs .spec{min-width:0;max-width:100%;padding-left:0;padding-right:0;}
+.specs .spec-value{display:flex;align-items:center;min-width:0;max-width:100%;gap:9px;}
+.specs .spec.primary .spec-label{font-size:14px;white-space:nowrap;}
+.specs .spec.primary .spec-value{font-size:clamp(18px,2vw,23px);white-space:nowrap;flex:0 1 auto;}
+.specs .spec b{display:flex;}
 </style>
 <link rel="stylesheet" href="assets/header-size.css?v=20261112-1"><link rel="stylesheet" href="assets/reviews-dropdown.css?v=20261114-fix2"></head>
 <body>
