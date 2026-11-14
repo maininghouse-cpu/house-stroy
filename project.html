@@ -116,6 +116,20 @@
 .specs .spec.primary .spec-label{font-size:14px;white-space:nowrap;}
 .specs .spec.primary .spec-value{font-size:clamp(18px,2vw,23px);white-space:nowrap;flex:0 1 auto;}
 .specs .spec b{display:flex;}
+
+/* Fit the four project metrics within the vertical bounds of the cover image. */
+@media(min-width:751px){
+ .detail-hero>div{display:flex;flex-direction:column;min-height:390px}
+ .detail-hero>div h1{font-size:clamp(27px,2.5vw,36px);line-height:1.12;margin:12px 0 12px}
+ .detail-hero>div p{font-size:clamp(14px,1.15vw,16px);line-height:1.35;margin:0 0 10px}
+ .detail-hero>div h2{font-size:clamp(23px,2vw,29px);line-height:1.1;margin:8px 0 0}
+ .specs{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 12px;margin: auto 0 0;padding-top:12px;align-items:end}
+ .specs .spec{min-width:0;gap:5px;padding:4px 0;align-items:flex-start}
+ .specs .spec.primary{flex-direction:column;align-items:flex-start;gap:5px;padding:4px 0}
+ .specs .spec-label,.specs .spec.primary .spec-label{font-size:12px;white-space:normal;line-height:1.15}
+ .specs .spec-value,.specs .spec.primary .spec-value{font-size:19px;line-height:1.1;gap:6px;white-space:nowrap}
+ .specs .spec-icon{width:30px;height:30px;flex:0 0 30px}
+}
 </style>
 <link rel="stylesheet" href="assets/header-size.css?v=20261112-1"><link rel="stylesheet" href="assets/reviews-dropdown.css?v=20261114-fix2"></head>
 <body>
