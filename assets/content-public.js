@@ -33,7 +33,7 @@ function closeViewer(){if(!viewer)return;viewer.hidden=true;document.body.classL
 
 async function portfolio(){
  const root=document.querySelector("[data-portfolio-list]");if(!root)return;
- const {data,error}=await sb.from("portfolio_items").select("*").eq("is_published",true).order("sort_order",{ascending:true}).order("created_at",{ascending:false});if(error){console.error("Не удалось загрузить портфолио:",error);root.innerHTML="<p>Не удалось загрузить проекты портфолио. Обновите страницу позже.</p>";return;}
+ const {data,error}=await sb.from("portfolio_items").select("*").eq("is_published",true).order("sort_order",{ascending:true}).order("created_at",{ascending:false});root.setAttribute("aria-busy","false");if(error){console.error("Не удалось загрузить портфолио:",error);root.innerHTML="<p>Не удалось загрузить проекты портфолио. Обновите страницу позже.</p>";return;}
  root.innerHTML=data.map((x,cardIndex)=>{
   const gallery=x.gallery_urls&&x.gallery_urls.length?x.gallery_urls:(x.image_url?[x.image_url]:[]);
    const firstPhoto=gallery[0];
