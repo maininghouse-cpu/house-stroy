@@ -4,7 +4,7 @@ const FALLBACK=[];
 let cache=FALLBACK;
 const sb=window.houseStroyClient;
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function money(n){const value=Number(n);return (Number.isFinite(value)?value:0).toLocaleString("ru-RU")+" ₽";}
+function money(n){const value=Number(n);return (Number.isFinite(value)?value:0).toLocaleString("ru-RU").replace(/[\u00a0\u202f]/g," ")+" руб."; }
 function publicUrl(path){try{return path&&sb?sb.storage.from("project-media").getPublicUrl(path).data.publicUrl:"";}catch(e){console.warn("Project image URL:",e);return "";}}
 function mapRow(row,mediaRows){
  const spec=row.specifications&&typeof row.specifications==="object"?row.specifications:{};
