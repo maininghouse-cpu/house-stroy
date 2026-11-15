@@ -5,8 +5,8 @@ const categories = { photos: "Фотографии (PHOTO)", images: "Допол
 let projects = [], currentId = null, cover = null, media = {images:[],threeD:[],plans:[],facades:[]}, user = null, initializedUserId = null;
 const status = (id, msg, bad=false) => { const el=$(id); if(el){el.textContent=msg;el.style.color=bad?"#b82025":"";} };
 const slugify = s => s.toLowerCase().trim().replace(/ё/g,"e").replace(/[^a-zа-я0-9]+/gi,"-").replace(/^-|-$/g,"") || "house";
-const parsePrice = value => Number(String(value??"").replace(/\\D/g,""))||0;
- const formatPrice = value => {const digits=String(value??"").replace(/\\D/g,"");return digits?Number(digits).toLocaleString("ru-RU").replace(/[\\u00a0\\u202f]/g," "):"";};
+const parsePrice = value => Number(String(value??"").replace(/\D/g,""))||0;
+ const formatPrice = value => {const digits=String(value??"").replace(/\D/g,"");return digits?Number(digits).toLocaleString("ru-RU").replace(/[\u00a0\u202f]/g," "):"";};
  const escapeHtml = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const publicUrl = path => path ? sb.storage.from("project-media").getPublicUrl(path).data.publicUrl : "";
 function mapProject(row) {
@@ -285,7 +285,7 @@ window.houseStroyDeleteProject = async function(e){
  try{await deleteProject();}catch(err){console.error(err);status("editorStatus","Ошибка удаления: "+(err.message||String(err)),true);}
 };
 $("new").onclick=clearForm;$("clear").onclick=clearForm;
- ["sipPrice","framePrice"].forEach(id=>$(id)?.addEventListener("input",e=>{const input=e.target,start=input.selectionStart??input.value.length,before=input.value.slice(0,start).replace(/\\D/g,"").length;input.value=formatPrice(input.value);let pos=0,count=0;while(pos<input.value.length&&count<before){if(/\\d/.test(input.value[pos]))count++;pos++;}input.setSelectionRange(pos,pos);}));
+ ["sipPrice","framePrice"].forEach(id=>$(id)?.addEventListener("input",e=>{const input=e.target,start=input.selectionStart??input.value.length,before=input.value.slice(0,start).replace(/\D/g,"").length;input.value=formatPrice(input.value);let pos=0,count=0;while(pos<input.value.length&&count<before){if(/\d/.test(input.value[pos]))count++;pos++;}input.setSelectionRange(pos,pos);}));
  $("editor").addEventListener("input",saveDraft);$("editor").addEventListener("change",saveDraft);window.addEventListener("beforeunload",saveDraft);
 $("coverFile")?.addEventListener("change",e=>addFiles("cover",e.target.files));
 setupUploads();sb.auth.onAuthStateChange((event)=>{if(event==="PASSWORD_RECOVERY"){$("loginPanel").classList.add("hidden");$("workspace").classList.add("hidden");$("resetPanel").classList.remove("hidden");status("resetStatus","Введите новый пароль для учётной записи.");return;}if(event==="SIGNED_IN"||event==="SIGNED_OUT"||event==="INITIAL_SESSION"){if(event==="SIGNED_OUT")initializedUserId=null;setTimeout(openWorkspace,0);}});if(new URLSearchParams(location.search).get("mode")==="reset"){$("loginPanel").classList.add("hidden");$("resetPanel").classList.remove("hidden");}openWorkspace();
