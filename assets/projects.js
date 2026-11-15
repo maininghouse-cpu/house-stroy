@@ -96,6 +96,8 @@ function filterSetup(){
 }
 async function init(){
  const list=document.querySelector("[data-project-list]");
+ // The detail page uses HouseProjects.load() itself; do not start a second catalogue request there.
+ if(!list)return;
  if(list)list.innerHTML="<p>Загружаем проекты…</p>";
  const run=filterSetup();
  try{
