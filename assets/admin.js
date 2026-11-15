@@ -18,8 +18,9 @@ async function loadProjects() {
  if(error)throw error; projects=(data||[]).map(mapProject); renderList();
 }
 function renderList(){
- $("projectList").innerHTML=projects.map(p=>'<div class="project-row"><span>'+escapeHtml(p.name)+'<br><small>'+(p.published?"Опубликован":"Черновик")+'</small></span><button class="secondary" type="button" data-edit="'+p.id+'">Изменить</button></div>').join("")||"<p>Проектов пока нет.</p>";
+ $("projectList").innerHTML=projects.map(p=>{const active=p.id===currentId;return '<div class="project-row'+(active?" is-editing":"")+'" '+(active?'aria-current="true"':"")+'><span>'+escapeHtml(p.name)+'<br><small>'+(active?"СЕЙЧАС РЕДАКТИРУЕТСЯ":(p.published?"Опубликован":"Черновик"))+'</small></span><button class="secondary" type="button" data-edit="'+p.id+'">'+(active?"Выбран":"Изменить")+'</button></div>'}).join("")||"<p>Проектов пока нет.</p>";
  document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>loadForm(b.dataset.edit));
+ const indicator=$("editingIndicator"),label=$("editingIndicatorText"),active=projects.find(p=>p.id===currentId);if(indicator){indicator.classList.toggle("hidden",!active);if(label)label.textContent=active?"Сейчас редактируется: "+active.name:"";}
 }
 const DRAFT_KEY="houseStroyProjectDraft:v2";
 function saveDraft(){
@@ -54,7 +55,7 @@ function restoreDraft(){
 function clearForm(){
  try{sessionStorage.removeItem(DRAFT_KEY);}catch{}
  currentId=null;cover=null;media={photos:[],images:[],threeD:[],plans:[],facades:[]};$("editor").reset();$("id").value="";$("delete").disabled=true;
- renderThumbs("cover");Object.keys(categories).forEach(renderThumbs);status("editorStatus","Новый проект. Заполните характеристики и сохраните.");
+ renderThumbs("cover");Object.keys(categories).forEach(renderThumbs);renderList();status("editorStatus","Новый проект. Заполните характеристики и сохраните.");
 }
 function renderThumbs(key){
  const target=$(key==="cover"?"coverPreview":key+"Thumbs"); if(!target)return;
@@ -66,7 +67,7 @@ function loadForm(id){
  const p=projects.find(x=>x.id===id);if(!p)return;currentId=p.id;cover=p.cover?{...p.cover}:null;
  media=Object.fromEntries(Object.keys(categories).map(k=>[k,[...(p.media[k]||[])].map(x=>({...x}))]));
  $("id").value=p.id;$("name").value=p.name;$("sipPrice").value=p.sipPrice;$("framePrice").value=p.framePrice;$("sipDescription").value=p.sipDescription;$("frameDescription").value=p.frameDescription;$("totalArea").value=p.totalArea;$("dimensions").value=p.dimensions||"";$("floors").value=p.floors;$("bedrooms").value=p.bedrooms;$("bathrooms").value=p.bathrooms;$("shortDescription").value=p.shortDescription;$("description").value=p.description;$("published").checked=p.published;$("featured").checked=p.featured;$("delete").disabled=false;
- renderThumbs("cover");Object.keys(categories).forEach(renderThumbs);status("editorStatus","Редактирование проекта. Сохраните изменения после проверки.");saveDraft();
+ renderThumbs("cover");Object.keys(categories).forEach(renderThumbs);renderList();status("editorStatus","Редактирование проекта. Сохраните изменения после проверки.");saveDraft();
 }
 async function compressImage(file){
  if(!file.type.startsWith("image/"))throw new Error("Разрешены только изображения.");
