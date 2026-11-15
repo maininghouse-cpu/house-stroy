@@ -5,7 +5,9 @@ const categories = { photos: "Фотографии (PHOTO)", images: "Допол
 let projects = [], currentId = null, cover = null, media = {images:[],threeD:[],plans:[],facades:[]}, user = null, initializedUserId = null;
 const status = (id, msg, bad=false) => { const el=$(id); if(el){el.textContent=msg;el.style.color=bad?"#b82025":"";} };
 const slugify = s => s.toLowerCase().trim().replace(/ё/g,"e").replace(/[^a-zа-я0-9]+/gi,"-").replace(/^-|-$/g,"") || "house";
-const escapeHtml = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const parsePrice = value => Number(String(value??"").replace(/\\D/g,""))||0;
+ const formatPrice = value => {const digits=String(value??"").replace(/\\D/g,"");return digits?Number(digits).toLocaleString("ru-RU").replace(/[\\u00a0\\u202f]/g," "):"";};
+ const escapeHtml = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const publicUrl = path => path ? sb.storage.from("project-media").getPublicUrl(path).data.publicUrl : "";
 function mapProject(row) {
  const spec=row.specifications||{}, rows=row.project_media||[];
@@ -41,7 +43,7 @@ function restoreDraft(){
    const p=projects.find(x=>x.id===draft.currentId);if(!p)return false;
    loadForm(draft.currentId);
   }else{currentId=null;cover=null;media={photos:[],images:[],threeD:[],plans:[],facades:[]};$("editor").reset();$("id").value="";}
-  Object.entries(draft.fields||{}).forEach(([id,value])=>{const el=$(id);if(!el)return;if(el.type==="checkbox")el.checked=!!value;else el.value=value??"";});
+  Object.entries(draft.fields||{}).forEach(([id,value])=>{const el=$(id);if(!el)return;if(el.type==="checkbox")el.checked=!!value;else el.value=(id==="sipPrice"||id==="framePrice")?formatPrice(value):value??"";});
   const clean=item=>item?{...item}:null;
   if(draft.cover)cover=clean(draft.cover);
   if(draft.media)media=Object.fromEntries(Object.keys(categories).map(k=>[k,(draft.media[k]||[]).map(clean)]));
@@ -66,7 +68,7 @@ function renderThumbs(key){
 function loadForm(id){
  const p=projects.find(x=>x.id===id);if(!p)return;currentId=p.id;cover=p.cover?{...p.cover}:null;
  media=Object.fromEntries(Object.keys(categories).map(k=>[k,[...(p.media[k]||[])].map(x=>({...x}))]));
- $("id").value=p.id;$("name").value=p.name;$("sipPrice").value=p.sipPrice;$("framePrice").value=p.framePrice;$("sipDescription").value=p.sipDescription;$("frameDescription").value=p.frameDescription;$("totalArea").value=p.totalArea;$("dimensions").value=p.dimensions||"";$("floors").value=p.floors;$("bedrooms").value=p.bedrooms;$("bathrooms").value=p.bathrooms;$("shortDescription").value=p.shortDescription;$("description").value=p.description;$("published").checked=p.published;$("featured").checked=p.featured;$("delete").disabled=false;
+ $("id").value=p.id;$("name").value=p.name;$("sipPrice").value=formatPrice(p.sipPrice);$("framePrice").value=formatPrice(p.framePrice);$("sipDescription").value=p.sipDescription;$("frameDescription").value=p.frameDescription;$("totalArea").value=p.totalArea;$("dimensions").value=p.dimensions||"";$("floors").value=p.floors;$("bedrooms").value=p.bedrooms;$("bathrooms").value=p.bathrooms;$("shortDescription").value=p.shortDescription;$("description").value=p.description;$("published").checked=p.published;$("featured").checked=p.featured;$("delete").disabled=false;
  renderThumbs("cover");Object.keys(categories).forEach(renderThumbs);renderList();status("editorStatus","Редактирование проекта. Сохраните изменения после проверки.");saveDraft();
 }
 async function compressImage(file){
@@ -120,7 +122,7 @@ async function saveProject(e){
   if(cover===null){coverPath=null;coverUrl=null;}
   if(coverPath)specs.cover_path=coverPath;else delete specs.cover_path;
   if(coverUrl)specs.cover_url=coverUrl;else delete specs.cover_url;
-  const sipPrice=Number($("sipPrice").value)||0,framePrice=Number($("framePrice").value)||0;specs.sip_price=sipPrice;specs.frame_price=framePrice;specs.sip_description=$("sipDescription").value.trim();specs.frame_description=$("frameDescription").value.trim();
+  const sipPrice=parsePrice($("sipPrice").value),framePrice=parsePrice($("framePrice").value);specs.sip_price=sipPrice;specs.frame_price=framePrice;specs.sip_description=$("sipDescription").value.trim();specs.frame_description=$("frameDescription").value.trim();
   const row={id,slug:slugify(name)+"-"+id.slice(0,8),title:name,short_description:$("shortDescription").value.trim(),description:$("description").value.trim(),total_area:Number($("totalArea").value)||null,price:Math.min(sipPrice||Infinity,framePrice||Infinity)===Infinity?null:Math.min(sipPrice||Infinity,framePrice||Infinity),floors:Number($("floors").value)||1,bedrooms:Number($("bedrooms").value)||0,bathrooms:Number($("bathrooms").value)||0,is_published:$("published").checked,is_featured:$("featured").checked,sort_order:old?.sortOrder||0,specifications:specs};
   const {error:upsertError}=await sb.from("projects").upsert(row);if(upsertError)throw upsertError;
   const keepPaths=new Set();
@@ -283,6 +285,7 @@ window.houseStroyDeleteProject = async function(e){
  try{await deleteProject();}catch(err){console.error(err);status("editorStatus","Ошибка удаления: "+(err.message||String(err)),true);}
 };
 $("new").onclick=clearForm;$("clear").onclick=clearForm;
+ ["sipPrice","framePrice"].forEach(id=>$(id)?.addEventListener("input",e=>{const input=e.target,start=input.selectionStart??input.value.length,before=input.value.slice(0,start).replace(/\\D/g,"").length;input.value=formatPrice(input.value);let pos=0,count=0;while(pos<input.value.length&&count<before){if(/\\d/.test(input.value[pos]))count++;pos++;}input.setSelectionRange(pos,pos);}));
  $("editor").addEventListener("input",saveDraft);$("editor").addEventListener("change",saveDraft);window.addEventListener("beforeunload",saveDraft);
 $("coverFile")?.addEventListener("change",e=>addFiles("cover",e.target.files));
 setupUploads();sb.auth.onAuthStateChange((event)=>{if(event==="PASSWORD_RECOVERY"){$("loginPanel").classList.add("hidden");$("workspace").classList.add("hidden");$("resetPanel").classList.remove("hidden");status("resetStatus","Введите новый пароль для учётной записи.");return;}if(event==="SIGNED_IN"||event==="SIGNED_OUT"||event==="INITIAL_SESSION"){if(event==="SIGNED_OUT")initializedUserId=null;setTimeout(openWorkspace,0);}});if(new URLSearchParams(location.search).get("mode")==="reset"){$("loginPanel").classList.add("hidden");$("resetPanel").classList.remove("hidden");}openWorkspace();
