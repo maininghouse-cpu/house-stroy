@@ -1,0 +1,5 @@
+(() => {
+const sb=window.houseStroyClient;if(!sb)return;
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+(async()=>{const {data,error}=await sb.from("articles").select("slug,title,category,excerpt,cover_url").eq("is_published",true).order("sort_order").order("created_at",{ascending:false});if(error||!data?.length)return;const wrap=document.querySelector("main .section .wrap");if(!wrap)return;wrap.innerHTML=data.map(a=>'<article class="interesting-card">'+(a.cover_url?'<img src="'+esc(a.cover_url)+'" alt="" style="width:100%;max-height:260px;object-fit:cover;border-radius:10px">':"")+'<div class="eyebrow-dark">'+esc(a.category||"Статья")+'</div><h2><a href="article.html?slug='+encodeURIComponent(a.slug)+'">'+esc(a.title)+'</a></h2><p>'+esc(a.excerpt||"")+'</p><a class="interesting-link" href="article.html?slug='+encodeURIComponent(a.slug)+'">Читать статью →</a></article>').join("");})();
+})();
