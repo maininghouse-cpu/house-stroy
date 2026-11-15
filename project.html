@@ -156,7 +156,7 @@
 </div>
 <script src="assets/site.js?v=20261112-theme-fix1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="assets/supabase-config.js?v=20261112-5"></script><script src="assets/projects.js?v=20261114-no-floors"></script>
+<script src="assets/supabase-config.js?v=20261112-5"></script><script src="assets/projects.js?v=20261115-detail-load-fix"></script>
 <script>
 const params=new URLSearchParams(location.search),root=document.getElementById("content");
 let allSlides=[],lightboxSlides=[],slideIndex=0,project,activeBuildType="sip";
@@ -238,7 +238,7 @@ function renderGallery(){
  updateGallery();
 }
 (async()=>{try{
- const all=await HouseProjects.load();
+ const all=await Promise.race([HouseProjects.load(),new Promise((_,reject)=>setTimeout(()=>reject(new Error("Истекло время ожидания ответа базы данных")),15000))]);
  const index=all.findIndex(x=>String(x.id)===params.get("id")||x.slug===params.get("id"));
  if(index<0){root.innerHTML="<h1>Проект не найден</h1>";return;}
  project=all[index];
