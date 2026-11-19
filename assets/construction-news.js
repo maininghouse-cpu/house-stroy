@@ -64,7 +64,8 @@
   async function load() {
     const client = window.houseStroyClient;
     if (!client) {
-      list.innerHTML = '<p class="construction-news-error">Не удалось подключить ленту объектов. Попробуйте обновить страницу.</p>';
+      items = companyNews;
+      render();
       return;
     }
     try {
@@ -77,8 +78,9 @@
       items = [...companyNews, ...(data || [])];
       render();
     } catch (error) {
-      console.error("Не удалось загрузить новости строительства", error);
-      list.innerHTML = '<p class="construction-news-error">Не удалось загрузить объекты. Попробуйте обновить страницу позже.</p>';
+      console.error("Не удалось загрузить дополнительные объекты", error);
+      items = companyNews;
+      render();
     }
   }
   load();
