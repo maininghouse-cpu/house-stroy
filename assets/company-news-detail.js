@@ -25,8 +25,38 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
  '</style><div class="news-photo-gallery">'+photos.map((url,i)=>'<button type="button" data-news-photo="'+i+'" aria-label="Открыть фото '+(i+1)+'"><img src="'+esc(url)+'" alt="'+esc(data.title)+' — фото '+(i+1)+'" loading="'+(i===0?'eager':'lazy')+'"></button>').join('')+'</div>':'')+
  (data.construction_stage?'<p class="news-stage">'+esc(data.construction_stage)+'</p>':'')+
  '<div class="news-actions"><a class="btn" href="contacts.html">Обсудить строительство ↗</a></div>';
- if(photos.length){let current=0;const show=()=>{let viewer=document.querySelector(".news-photo-viewer");if(!viewer){viewer=document.createElement("div");viewer.className="news-photo-viewer";viewer.innerHTML='<button class="close" aria-label="Закрыть">×</button><button class="prev" aria-label="Предыдущее фото">‹</button><img alt=""><button class="next" aria-label="Следующее фото">›</button>';document.body.appendChild(viewer);viewer.addEventListener("click",e=>{if(e.target===viewer||e.target.classList.contains("close"))viewer.remove();else if(e.target.classList.contains("prev")){current=(current+photos.length-1)%photos.length;showImage();}else if(e.target.classList.contains("next")){current=(current+1)%photos.length;showImage();}});}const showImage=()=>{viewer.querySelector("img").src=photos[current];viewer.querySelector("img").alt=data.title+" — фото "+(current+1);};showImage();};
- root.querySelectorAll("[data-news-photo]").forEach(btn=>btn.addEventListener("click",()=>{current=Number(btn.dataset.newsPhoto);show();}));
+ if(photos.length){
+  let current=0;
+  const show=()=>{
+   let viewer=document.querySelector(".news-photo-viewer");
+   if(!viewer){
+    viewer=document.createElement("div");viewer.className="news-photo-viewer";
+    viewer.innerHTML='<button class="close" aria-label="Закрыть">×</button><button class="prev" aria-label="Предыдущее фото">‹</button><img alt=""><button class="next" aria-label="Следующее фото">›</button>';
+    document.body.appendChild(viewer);
+    viewer.addEventListener("click",e=>{
+     if(e.target===viewer||e.target.classList.contains("close"))viewer.remove();
+     else if(e.target.classList.contains("prev")){current=(current+photos.length-1)%photos.length;showImage();}
+     else if(e.target.classList.contains("next")){current=(current+1)%photos.length;showImage();}
+    });
+   }
+   showImage();
+  };
+  const showImage=()=>{
+   const viewer=document.querySelector(".news-photo-viewer");if(!viewer)return;
+   viewer.querySelector("img").src=photos[current];
+   viewer.querySelector("img").alt=data.title+" — фото "+(current+1);
+  };
+  document.addEventListener("keydown",e=>{
+   const viewer=document.querySelector(".news-photo-viewer");if(!viewer)return;
+   const target=e.target;
+   if(target&&(target.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)))return;
+   if(e.key==="ArrowLeft"){e.preventDefault();current=(current+photos.length-1)%photos.length;showImage();}
+   else if(e.key==="ArrowRight"){e.preventDefault();current=(current+1)%photos.length;showImage();}
+   else if(e.key==="Escape"){e.preventDefault();viewer.remove();}
+  });
+  root.querySelectorAll("[data-news-photo]").forEach(btn=>btn.addEventListener("click",()=>{
+   current=Number(btn.dataset.newsPhoto);show();
+  }));
  }
 })();
 })();
