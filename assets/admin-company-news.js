@@ -44,9 +44,11 @@
   function renderPhotos() {
     const input=$("companyNewsPhotos"), preview=$("companyNewsPhotoPreview"), files=Array.from(input.files||[]);
     if(!preview)return;
-    const saved=gallery.map((url,i)=>'<div class="thumb"><img src="'+esc(url)+'" alt="Фото '+(i+1)+'"><button type="button" data-news-remove-saved="'+i+'" aria-label="Удалить фото">×</button></div>').join("");
-    const fresh=files.map((file,i)=>'<div class="thumb"><img src="'+URL.createObjectURL(file)+'" alt="Новое фото"><button type="button" data-news-remove-new="'+i+'" aria-label="Убрать новое фото">×</button></div>').join("");
-    preview.innerHTML='<div class="thumbs">'+saved+fresh+'</div><small>'+ (gallery.length+files.length)+' фотографий · '+gallery.length+' сохранено, '+files.length+' новых</small>';
+    const saved=gallery.map((url,i)=>'<div class="thumb news-gallery-thumb"><img src="'+esc(url)+'" alt="Фото '+(i+1)+'"><div class="news-gallery-tools"><button type="button" data-news-move-up="'+i+'" aria-label="Переместить фото влево" '+(i===0?'disabled':'')+'>←</button><button type="button" data-news-move-down="'+i+'" aria-label="Переместить фото вправо" '+(i===gallery.length-1?'disabled':'')+'>→</button><button type="button" data-news-remove-saved="'+i+'" aria-label="Удалить фото">×</button></div><small>'+(i===0?'Обложка':'Фото '+(i+1))+'</small></div>').join("");
+    const fresh=files.map((file,i)=>'<div class="thumb"><img src="'+URL.createObjectURL(file)+'" alt="Новое фото"><button type="button" data-news-remove-new="'+i+'" aria-label="Убрать новое фото">×</button><small>Новое фото '+(i+1)+'</small></div>').join("");
+    preview.innerHTML='<style>.news-gallery-thumb{display:flex;flex-direction:column;gap:4px}.news-gallery-tools{display:flex;gap:3px;justify-content:center}.news-gallery-tools button{position:static;border:1px solid #aaa;border-radius:6px;background:var(--card,#fff);color:var(--text,#222);padding:3px 8px;cursor:pointer}.news-gallery-tools button:disabled{opacity:.3;cursor:default}.news-gallery-thumb>small{text-align:center;color:var(--muted,#777)}</style><div class="thumbs">'+saved+fresh+'</div><small>'+ (gallery.length+files.length)+' фотографий · перетаскивайте порядок стрелками · '+gallery.length+' сохранено, '+files.length+' новых</small>';
+    preview.querySelectorAll("[data-news-move-up]").forEach(b=>b.onclick=()=>{const i=Number(b.dataset.newsMoveUp);if(i<1)return;[gallery[i-1],gallery[i]]=[gallery[i],gallery[i-1]];$("companyNewsImage").value=gallery[0]||"";renderPhotos();});
+    preview.querySelectorAll("[data-news-move-down]").forEach(b=>b.onclick=()=>{const i=Number(b.dataset.newsMoveDown);if(i>=gallery.length-1)return;[gallery[i+1],gallery[i]]=[gallery[i],gallery[i+1]];$("companyNewsImage").value=gallery[0]||"";renderPhotos();});
     preview.querySelectorAll("[data-news-remove-saved]").forEach(b=>b.onclick=()=>{const removed=gallery.splice(Number(b.dataset.newsRemoveSaved),1)[0];if(removed===$("companyNewsImage").value)$("companyNewsImage").value=gallery[0]||"";renderPhotos();});
     preview.querySelectorAll("[data-news-remove-new]").forEach(b=>b.onclick=()=>{const dt=new DataTransfer(),remove=Number(b.dataset.newsRemoveNew);files.forEach((f,i)=>{if(i!==remove)dt.items.add(f);});input.files=dt.files;renderPhotos();});
   }
@@ -94,7 +96,7 @@
         style:$("companyNewsStyle").value.trim()||null,
         construction_status:$("companyNewsStatus").value,
         construction_stage:$("companyNewsStage").value.trim()||null,
-        image_url:$("companyNewsImage").value.trim()||null,
+        image_url:(gallery[0]||$("companyNewsImage").value.trim())||null,
         gallery_urls:[...new Set([...gallery,...await uploadNewPhotos(id)])],
         source_url:$("companyNewsUrl").value.trim()||null,
         sort_order:Number($("companyNewsOrder").value)||0,
