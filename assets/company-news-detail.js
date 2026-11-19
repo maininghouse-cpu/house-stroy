@@ -18,7 +18,12 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
  '.news-photo-gallery img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s}'+
  '.news-photo-gallery button:hover img{transform:scale(1.035)}'+
  '.news-photo-viewer{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;padding:56px 22px 24px}'+
- '.news-photo-viewer img{max-width: min(1100px,94vw);max-height:86vh;object-fit:contain}'+
+ '.news-photo-viewer{flex-direction:column;gap:14px}'+
+ '.news-photo-viewer img{max-width:min(1100px,94vw);max-height:calc(86vh - 90px);object-fit:contain}'+
+ '.news-photo-thumbs{display:flex;gap:8px;max-width:94vw;overflow-x:auto;padding:4px 2px 8px;position:relative;z-index:2}'+
+ '.news-photo-thumbs button{position:relative;flex:0 0 68px;width:68px;height:52px;border:2px solid transparent;border-radius:7px;overflow:hidden;padding:0;background:#333;cursor:pointer}'+
+ '.news-photo-thumbs button.active{border-color:#d71920}'+
+ '.news-photo-thumbs img{width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;display:block}'+
  '.news-photo-viewer button{position:absolute;border:0;background:rgba(255,255,255,.15);color:#fff;font-size:28px;width:44px;height:44px;border-radius:50%;cursor:pointer}'+
  '.news-photo-viewer .close{right:18px;top:16px}.news-photo-viewer .prev{left:18px}.news-photo-viewer .next{right:18px}'+
  '@media(max-width:700px){.news-photo-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.news-photo-gallery button:first-child{grid-column:span 2;min-height:220px}}'+
@@ -31,12 +36,13 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
    let viewer=document.querySelector(".news-photo-viewer");
    if(!viewer){
     viewer=document.createElement("div");viewer.className="news-photo-viewer";
-    viewer.innerHTML='<button class="close" aria-label="Закрыть">×</button><button class="prev" aria-label="Предыдущее фото">‹</button><img alt=""><button class="next" aria-label="Следующее фото">›</button>';
+    viewer.innerHTML='<button class="close" aria-label="Закрыть">×</button><button class="prev" aria-label="Предыдущее фото">‹</button><img alt=""><button class="next" aria-label="Следующее фото">›</button><div class="news-photo-thumbs" aria-label="Миниатюры фотографий">'+photos.map((url,i)=>'<button type="button" data-viewer-thumb="'+i+'" aria-label="Показать фото '+(i+1)+'"><img src="'+esc(url)+'" alt=""></button>').join('')+'</div>';
     document.body.appendChild(viewer);
     viewer.addEventListener("click",e=>{
      if(e.target===viewer||e.target.classList.contains("close"))viewer.remove();
      else if(e.target.classList.contains("prev")){current=(current+photos.length-1)%photos.length;showImage();}
      else if(e.target.classList.contains("next")){current=(current+1)%photos.length;showImage();}
+     else if(e.target.closest("[data-viewer-thumb]")){current=Number(e.target.closest("[data-viewer-thumb]").dataset.viewerThumb);showImage();}
     });
    }
    showImage();
@@ -45,6 +51,10 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
    const viewer=document.querySelector(".news-photo-viewer");if(!viewer)return;
    viewer.querySelector("img").src=photos[current];
    viewer.querySelector("img").alt=data.title+" — фото "+(current+1);
+   viewer.querySelectorAll("[data-viewer-thumb]").forEach((thumb,i)=>{
+    thumb.classList.toggle("active",i===current);
+    if(i===current)thumb.scrollIntoView({block:"nearest",inline:"nearest"});
+   });
   };
   document.addEventListener("keydown",e=>{
    const viewer=document.querySelector(".news-photo-viewer");if(!viewer)return;
