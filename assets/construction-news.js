@@ -16,6 +16,11 @@
   ];
   let items = [...companyNews];
   let activeFilter = "all";
+  const scrollButtons = [...root.querySelectorAll("[data-news-scroll]")];
+  scrollButtons.forEach(button => button.addEventListener("click", () => {
+    const direction = Number(button.dataset.newsScroll) || 1;
+    list.scrollBy({ left: direction * list.clientWidth, behavior: "smooth" });
+  }));
 
   function render() {
     const visible = items.filter(item => activeFilter === "all" || (item.construction_status || "completed") === activeFilter);
@@ -28,6 +33,7 @@
       list.innerHTML = '<div class="construction-news-empty"><strong>' + (activeFilter === "building" ? "Сейчас нет объектов с этим статусом" : "Пока нет опубликованных объектов") + '</strong><span>Новые фотографии и этапы строительства появятся здесь после обновления раздела.</span></div>';
       return;
     }
+    list.scrollLeft = 0;
     list.innerHTML = visible.map(item => {
       const status = item.construction_status === "building" ? "building" : "completed";
       const statusLabel = status === "building" ? "Строится" : "Построен";
