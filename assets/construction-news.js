@@ -32,15 +32,16 @@
       const status = item.construction_status === "building" ? "building" : "completed";
       const statusLabel = status === "building" ? "Строится" : "Построен";
       const image = item.image_url || (Array.isArray(item.gallery_urls) ? item.gallery_urls[0] : "") || "";
-      const photoCount = Array.isArray(item.gallery_urls) && item.gallery_urls.length ? item.gallery_urls.length : (image ? 1 : 0);
+      const photoCount = new Set([...(image?[image]:[]),...(Array.isArray(item.gallery_urls)?item.gallery_urls:[])]).size;
       const rawTitle = String(item.title || "").trim();
       const title = /^\d+$/.test(rawTitle) ? (item.style || "Реализованный дом") : rawTitle;
       const details = [item.construction_location, item.area ? Number(item.area).toLocaleString("ru-RU") + " м²" : "", item.style].filter(Boolean);
       const stage = item.construction_stage || (status === "building" ? "Идут строительные работы" : "Готовый дом");
       const date = item.updated_at ? new Date(item.updated_at) : null;
       const dateLabel = item.news_date || (date && !Number.isNaN(date.getTime()) ? "Обновлено " + date.toLocaleDateString("ru-RU", {day:"numeric",month:"long",year:"numeric"}) : "");
+      const detailUrl = item.id && item.news_date !== undefined ? "news.html?id=" + encodeURIComponent(item.id) : "portfolio.html";
       return '<article class="construction-news-card">' +
-        '<a class="construction-news-image" href="' + esc(item.source_url || "portfolio.html") + '" target="' + (item.source_url ? '_blank' : '_self') + '" rel="noopener noreferrer" aria-label="Смотреть объект: ' + esc(title) + '">' +
+        '<a class="construction-news-image" href="' + esc(detailUrl) + '" aria-label="Открыть новость: ' + esc(title) + '">' +
           (image ? '<img src="' + esc(image) + '" alt="' + esc(title) + ' — фотографии объекта HOUSE STROY" loading="lazy">' : '<span class="construction-news-noimage">Фото объекта скоро появится</span>') +
           '<span class="construction-news-status ' + status + '">' + statusLabel + '</span>' +
           (photoCount > 1 ? '<span class="construction-news-count">+' + (photoCount - 1) + ' фото</span>' : '') +
@@ -50,7 +51,7 @@
           '<h3>' + esc(title) + '</h3>' +
           '<p class="construction-news-stage">' + esc(stage) + '</p>' +
           (dateLabel ? '<time class="construction-news-date">' + esc(dateLabel) + '</time>' : '') +
-          '<a class="construction-news-link" href="' + esc(item.source_url || "portfolio.html") + '" target="' + (item.source_url ? '_blank' : '_self') + '" rel="noopener noreferrer">Подробнее <span aria-hidden="true">↗</span></a>' +
+          '<a class="construction-news-link" href="' + esc(detailUrl) + '">Подробнее <span aria-hidden="true">↗</span></a>' +
         '</div>' +
       '</article>';
     }).join("");
@@ -71,7 +72,7 @@
     try {
       const [{ data: newsData, error: newsError }, { data: portfolioData, error: portfolioError }] = await Promise.all([
         client.from("company_news")
-          .select("id,title,image_url,style,construction_status,construction_location,construction_stage,news_date,source_url,sort_order,updated_at")
+          .select("id,title,image_url,gallery_urls,style,construction_status,construction_location,construction_stage,news_date,source_url,sort_order,updated_at")
           .eq("is_published", true)
           .order("sort_order", { ascending: true })
           .order("created_at", { ascending: false }),
