@@ -24,7 +24,7 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
  '.news-photo-thumbs button{position:relative;flex:0 0 68px;width:68px;height:52px;border:2px solid transparent;border-radius:7px;overflow:hidden;padding:0;background:#333;cursor:pointer}'+
  '.news-photo-thumbs button.active{border-color:#d71920}'+
  '.news-photo-thumbs img{width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;display:block}'+
- '.news-photo-viewer button{position:absolute;border:0;background:rgba(255,255,255,.15);color:#fff;font-size:28px;width:44px;height:44px;border-radius:50%;cursor:pointer}'+
+ '.news-photo-viewer > button{position:absolute;border:0;background:rgba(255,255,255,.15);color:#fff;font-size:28px;width:44px;height:44px;border-radius:50%;cursor:pointer}'+
  '.news-photo-viewer .close{right:18px;top:16px}.news-photo-viewer .prev{left:18px}.news-photo-viewer .next{right:18px}'+
  '@media(max-width:700px){.news-photo-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.news-photo-gallery button:first-child{grid-column:span 2;min-height:220px}}'+
  '</style><div class="news-photo-gallery">'+photos.map((url,i)=>'<button type="button" data-news-photo="'+i+'" aria-label="Открыть фото '+(i+1)+'"><img src="'+esc(url)+'" alt="'+esc(data.title)+' — фото '+(i+1)+'" loading="'+(i===0?'eager':'lazy')+'"></button>').join('')+'</div>':'')+
