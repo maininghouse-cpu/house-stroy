@@ -69,13 +69,21 @@
       return;
     }
     try {
-      const { data, error } = await client.from("portfolio_items")
-        .select("id,title,image_url,area,style,is_published,sort_order,gallery_urls,construction_status,construction_location,construction_stage,updated_at")
-        .eq("is_published", true)
-        .order("updated_at", { ascending: false })
-        .order("sort_order", { ascending: true });
-      if (error) throw error;
-      items = [...companyNews, ...(data || [])];
+      const [{ data: newsData, error: newsError }, { data: portfolioData, error: portfolioError }] = await Promise.all([
+        client.from("company_news")
+          .select("id,title,image_url,style,construction_status,construction_location,construction_stage,news_date,source_url,sort_order,updated_at")
+          .eq("is_published", true)
+          .order("sort_order", { ascending: true })
+          .order("created_at", { ascending: false }),
+        client.from("portfolio_items")
+          .select("id,title,image_url,area,style,is_published,sort_order,gallery_urls,construction_status,construction_location,construction_stage,updated_at")
+          .eq("is_published", true)
+          .order("updated_at", { ascending: false })
+          .order("sort_order", { ascending: true })
+      ]);
+      if (newsError) throw newsError;
+      if (portfolioError) throw portfolioError;
+      items = [...(newsData || []), ...(portfolioData || [])];
       render();
     } catch (error) {
       console.error("Не удалось загрузить дополнительные объекты", error);
