@@ -47,7 +47,7 @@
     const saved=gallery.map((url,i)=>'<div class="thumb"><img src="'+esc(url)+'" alt="Фото '+(i+1)+'"><button type="button" data-news-remove-saved="'+i+'" aria-label="Удалить фото">×</button></div>').join("");
     const fresh=files.map((file,i)=>'<div class="thumb"><img src="'+URL.createObjectURL(file)+'" alt="Новое фото"><button type="button" data-news-remove-new="'+i+'" aria-label="Убрать новое фото">×</button></div>').join("");
     preview.innerHTML='<div class="thumbs">'+saved+fresh+'</div><small>'+ (gallery.length+files.length)+' фотографий · '+gallery.length+' сохранено, '+files.length+' новых</small>';
-    preview.querySelectorAll("[data-news-remove-saved]").forEach(b=>b.onclick=()=>{gallery.splice(Number(b.dataset.newsRemoveSaved),1);renderPhotos();});
+    preview.querySelectorAll("[data-news-remove-saved]").forEach(b=>b.onclick=()=>{const removed=gallery.splice(Number(b.dataset.newsRemoveSaved),1)[0];if(removed===$("companyNewsImage").value)$("companyNewsImage").value=gallery[0]||"";renderPhotos();});
     preview.querySelectorAll("[data-news-remove-new]").forEach(b=>b.onclick=()=>{const dt=new DataTransfer(),remove=Number(b.dataset.newsRemoveNew);files.forEach((f,i)=>{if(i!==remove)dt.items.add(f);});input.files=dt.files;renderPhotos();});
   }
   async function uploadNewPhotos(id) {
