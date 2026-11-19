@@ -14,6 +14,6 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
  (photos[0]?'<img class="news-cover" src="'+esc(photos[0])+'" alt="'+esc(data.title)+'" loading="eager">':'')+
  (data.construction_stage?'<p class="news-stage">'+esc(data.construction_stage)+'</p>':'')+
  (photos.length>1?'<div class="news-gallery">'+photos.slice(1).map((url,i)=>'<img src="'+esc(url)+'" alt="'+esc(data.title)+' — фото '+(i+2)+'" loading="lazy">').join("")+'</div>':'')+
- '<div class="news-actions"><a class="btn" href="contacts.html">Обсудить строительство ↗</a>'+(data.source_url?'<a class="btn outline" href="'+esc(data.source_url)+'" target="_blank" rel="noopener noreferrer">Исходная публикация ↗</a>':'')+'</div>';
+ '<div class="news-actions"><a class="btn" href="contacts.html">Обсудить строительство ↗</a></div>';
 })();
 })();
