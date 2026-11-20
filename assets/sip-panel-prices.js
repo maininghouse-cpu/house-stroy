@@ -28,4 +28,29 @@ async function load(){
  render();
 }
 load();
+const estimateForm=$('sipEstimateForm');
+if(estimateForm){
+ estimateForm.addEventListener('submit',async event=>{
+  event.preventDefault();
+  const status=$('sipEstimateStatus'),button=estimateForm.querySelector('[type="submit"]');
+  const name=estimateForm.elements.name.value.trim(),phone=estimateForm.elements.phone.value.trim(),consent=estimateForm.elements.consent.checked;
+  const selected=rows.filter(row=>row.qty>0).map(row=>({length:row.length,width:row.width,thickness:row.thickness,qty:row.qty,price:row.qty>=50?row.bulk:row.retail}));
+  if(!selected.length){status.textContent='Добавьте количество хотя бы одной панели в таблице.';status.style.color='#b82025';return;}
+  if(!name||!phone||!consent){status.textContent='Заполните имя, телефон и подтвердите согласие на обработку персональных данных.';status.style.color='#b82025';return;}
+  if(!/^[+()0-9\\s-]{6,40}$/.test(phone)){status.textContent='Проверьте правильность номера телефона.';status.style.color='#b82025';return;}
+  if(!sb?.functions){status.textContent='Не удалось подключиться к сервису отправки. Попробуйте позже или позвоните нам.';status.style.color='#b82025';return;}
+  button.disabled=true;status.textContent='Отправляем расчёт…';status.style.color='';
+  try{
+   const {data,error}=await sb.functions.invoke('send-callback-request',{body:{type:'sip_panel_estimate',name,phone,consent:true,items:selected}});
+   if(error)throw error;
+   if(!data?.ok)throw new Error(data?.error||'Не удалось отправить расчёт.');
+   status.textContent='Расчёт отправлен на info@house-stroy.com. Спасибо! Мы свяжемся с вами.';
+   status.style.color='#168044';
+   estimateForm.reset();
+  }catch(error){
+   status.textContent=error?.message||'Не удалось отправить расчёт. Попробуйте ещё раз.';
+   status.style.color='#b82025';
+  }finally{button.disabled=false;}
+ });
+}
 })();
