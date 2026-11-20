@@ -35,7 +35,12 @@ function render(){
  $('sipTotalQty').textContent=money(qty);$('sipTotalCost').textContent=money(cost);
 }
 async function load(){
- if(sb){const {data,error}=await sb.from('site_settings').select('value').eq('key','sip_panel_prices').maybeSingle();if(!error&&data?.value){try{const saved=JSON.parse(data.value);if(Array.isArray(saved)&&saved.length===6)rows=defaults.map((d,i)=>({...d,...saved[i],qty:0}));}catch(e){console.warn('Некорректный формат прайса СИП панелей',e);}}}
+ if(sb){
+  const {data,error}=await sb.from('site_settings').select('value').eq('key','sip_panel_prices').maybeSingle();
+  if(!error&&data?.value){try{const saved=JSON.parse(data.value);if(Array.isArray(saved)&&saved.length===6)rows=defaults.map((d,i)=>({...d,...saved[i],qty:0}));}catch(e){console.warn('Некорректный формат прайса СИП панелей',e);}}
+  const {data:greenData,error:greenError}=await sb.from('site_settings').select('value').eq('key','greenboard_sip_panel_prices').maybeSingle();
+  if(!greenError&&greenData?.value){try{const savedGreen=JSON.parse(greenData.value);if(Array.isArray(savedGreen)&&savedGreen.length===3)greenboardRows=greenboardDefaults.map((d,i)=>({...d,...savedGreen[i],qty:0}));}catch(e){console.warn('Некорректный формат прайса Гринборд',e);}}
+ }
  render();
 }
 load();
