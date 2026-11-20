@@ -16,11 +16,36 @@
     say("Новая новость. Заполните поля и добавьте фотографии.");
   }
   function renderList() {
-    $("companyNewsAdminList").innerHTML = rows.map(row =>
-      '<div class="project-row '+($("companyNewsId").value===row.id?"is-editing":"")+'"><span><b>'+esc(row.title)+'</b><br><small>'+esc(row.news_date||"Без даты")+' · '+(row.is_published?"Опубликовано":"Скрыто")+' · '+(row.construction_status==="building"?"Строится":"Построен")+'</small></span><span><button class="secondary" type="button" data-company-news-edit="'+row.id+'">Изменить</button> <button class="secondary danger" type="button" data-company-news-delete="'+row.id+'">Удалить</button></span></div>'
+    $("companyNewsAdminList").innerHTML = rows.map((row,index) =>
+      '<div class="project-row '+($("companyNewsId").value===row.id?"is-editing":"")+'"><span><b>'+esc(row.title)+'</b><br><small>'+esc(row.news_date||"Без даты")+' · '+(row.is_published?"Опубликовано":"Скрыто")+' · '+(row.construction_status==="building"?"Строится":"Построен")+'</small></span><span class="company-news-row-actions"><button class="secondary" type="button" data-company-news-up="'+row.id+'" aria-label="Переместить новость выше" title="Переместить выше" '+(index===0?'disabled':'')+'>↑</button> <button class="secondary" type="button" data-company-news-down="'+row.id+'" aria-label="Переместить новость ниже" title="Переместить ниже" '+(index===rows.length-1?'disabled':'')+'>↓</button> <button class="secondary" type="button" data-company-news-edit="'+row.id+'">Изменить</button> <button class="secondary danger" type="button" data-company-news-delete="'+row.id+'">Удалить</button></span></div>'
     ).join("") || "<p class='muted'>Новостей пока нет.</p>";
+    $("companyNewsAdminList").querySelectorAll("[data-company-news-up]").forEach(button => button.addEventListener("click",()=>moveRow(button.dataset.companyNewsUp,-1)));
+    $("companyNewsAdminList").querySelectorAll("[data-company-news-down]").forEach(button => button.addEventListener("click",()=>moveRow(button.dataset.companyNewsDown,1)));
     $("companyNewsAdminList").querySelectorAll("[data-company-news-edit]").forEach(button => button.addEventListener("click",()=>editRow(button.dataset.companyNewsEdit)));
     $("companyNewsAdminList").querySelectorAll("[data-company-news-delete]").forEach(button => button.addEventListener("click",()=>deleteRow(button.dataset.companyNewsDelete)));
+  }
+  async function moveRow(id,direction) {
+    const from=rows.findIndex(item=>item.id===id),to=from+direction;
+    if(from<0||to<0||to>=rows.length)return;
+    const reordered=[...rows];
+    [reordered[from],reordered[to]]=[reordered[to],reordered[from]];
+    const status=$("companyNewsStatusMessage");
+    $("companyNewsAdminList").querySelectorAll("button").forEach(button=>button.disabled=true);
+    say("Сохраняем новый порядок новостей…");
+    try {
+      for(let i=0;i<reordered.length;i++){
+        const {error}=await sb.from("company_news").update({sort_order:(i+1)*10}).eq("id",reordered[i].id);
+        if(error)throw error;
+      }
+      rows=reordered.map((item,i)=>({...item,sort_order:(i+1)*10}));
+      renderList();
+      const editing=rows.find(item=>item.id===$("companyNewsId").value);
+      if(editing)$("companyNewsOrder").value=String(editing.sort_order);
+      say("Порядок новостей сохранён и обновлён на сайте.");
+    } catch(error) {
+      say("Не удалось изменить порядок: "+error.message,true);
+      await load();
+    }
   }
   function editRow(id) {
     const row=rows.find(item=>item.id===id); if(!row)return;
