@@ -37,7 +37,6 @@ if(estimateForm){
   const selected=rows.filter(row=>row.qty>0).map(row=>({length:row.length,width:row.width,thickness:row.thickness,qty:row.qty,price:row.qty>=50?row.bulk:row.retail}));
   if(!selected.length){status.textContent='Добавьте количество хотя бы одной панели в таблице.';status.style.color='#b82025';return;}
   if(!name||!phone||!consent){status.textContent='Заполните имя, телефон и подтвердите согласие на обработку персональных данных.';status.style.color='#b82025';return;}
-  if(!/^[+()0-9\\s-]{6,40}$/.test(phone)){status.textContent='Проверьте правильность номера телефона.';status.style.color='#b82025';return;}
   if(!sb?.functions){status.textContent='Не удалось подключиться к сервису отправки. Попробуйте позже или позвоните нам.';status.style.color='#b82025';return;}
   button.disabled=true;status.textContent='Отправляем расчёт…';status.style.color='';
   try{
