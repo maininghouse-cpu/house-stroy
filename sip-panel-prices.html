@@ -34,6 +34,16 @@
 .sip-row-cost,.sip-total{font-variant-numeric:tabular-nums;white-space:nowrap}.sip-price-table tfoot th{font-size:16px;background:rgba(128,128,128,.09)}.sip-total-label{text-align:right}
 .sip-loading{text-align:center;padding:24px!important;color:var(--muted)}.sip-price-footnote{padding:12px 20px 18px;color:var(--muted);font-size:13px;line-height:1.5}
 @media(max-width:760px){.sip-calc{margin-left:-4px;margin-right:-4px}.sip-calc-heading{padding:18px 15px 8px}.sip-price-table{font-size:14px}.sip-price-table th,.sip-price-table td{padding:10px 8px}}
+
+.sip-estimate-form{margin:18px 0 0;padding:22px;border:1px solid var(--line);border-radius:12px;background:var(--card,rgba(128,128,128,.04))}
+.sip-estimate-form h3{font-size:21px;margin:0 0 7px}.sip-estimate-form>p{margin:0 0 16px;color:var(--muted);line-height:1.55}
+.sip-estimate-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.sip-estimate-fields label{display:flex;flex-direction:column;gap:7px;font-weight:600;font-size:14px}
+.sip-estimate-fields input{width:100%;box-sizing:border-box;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--bg,#fff);color:var(--text);font:inherit}
+.sip-estimate-consent{display:flex;align-items:flex-start;gap:9px;margin:16px 0;font-size:13px;line-height:1.5}.sip-estimate-consent input{margin-top:3px;accent-color:#b82025}.sip-estimate-consent a{color:#b82025;text-decoration:underline}
+.sip-estimate-submit{padding:13px 18px;border:0;border-radius:8px;background:#b82025;color:#fff;font:inherit;font-weight:700;cursor:pointer}.sip-estimate-submit:hover{background:#961a1f}.sip-estimate-submit:disabled{opacity:.6;cursor:wait}
+.sip-estimate-status{margin:12px 0 0!important;font-size:14px}.sip-estimate-status:empty{display:none}
+@media(max-width:600px){.sip-estimate-fields{grid-template-columns:1fr}.sip-estimate-form{padding:17px}.sip-estimate-submit{width:100%}}
 </style>
 </head>
 <body>
@@ -51,6 +61,17 @@
     <tfoot><tr><th colspan="7" class="sip-total-label">Итого:</th><th id="sipTotalQty">0</th><th id="sipTotalCost">0</th></tr></tfoot>
   </table></div>
   <div class="sip-price-footnote">Цены указаны без НДС. Итоговая стоимость рассчитывается по выбранному количеству панелей и соответствующей ценовой категории.</div>
+  <form class="sip-estimate-form" id="sipEstimateForm">
+    <h3>Отправить расчёт на почту</h3>
+    <p>Укажите имя и телефон — отправим выбранные панели и предварительную стоимость на почту HOUSE STROY.</p>
+    <div class="sip-estimate-fields">
+      <label>Ваше имя<input type="text" name="name" maxlength="120" placeholder="Как к вам обращаться?" autocomplete="name" required></label>
+      <label>Контактный телефон<input type="tel" name="phone" maxlength="40" placeholder="+7 (___) ___-__-__" autocomplete="tel" required></label>
+    </div>
+    <label class="sip-estimate-consent"><input type="checkbox" name="consent" required><span>Даю согласие на <a href="#" data-doc="personal">обработку персональных данных</a>.</span></label>
+    <button class="sip-estimate-submit" type="submit">Отправить расчёт на info@house-stroy.com ↗</button>
+    <p class="sip-estimate-status" id="sipEstimateStatus" role="status" aria-live="polite"></p>
+  </form>
 </div>
 <p class="sip-price-intro">Подбираем СИП панели и комплектующие под конструкцию дома и задачи проекта. Итоговая стоимость зависит от толщины панели, размеров, объёма заказа и комплектации.</p>
 <div class="sip-price-grid">
