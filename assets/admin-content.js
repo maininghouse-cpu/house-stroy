@@ -37,9 +37,16 @@ function renderPortfolioPhotos(){
  const input=$("portfolioPhoto"),preview=$("portfolioPhotoPreview");
  let kept=[];try{kept=JSON.parse(input.dataset.galleryUrls||"[]");}catch{}
  const files=Array.from(input.files||[]),count=kept.length+files.length;
- const thumbs=kept.map((url,i)=>'<div class="thumb"><img src="'+esc(url)+'" alt="Фото '+(i+1)+'"><button type="button" data-remove-photo="'+i+'" aria-label="Удалить сохранённое фото '+(i+1)+'">×</button></div>').join("")+
+ const thumbs=kept.map((url,i)=>'<div class="thumb"><img src="'+esc(url)+'" alt="Фото '+(i+1)+'"><span style="position:absolute;left:3px;top:3px;display:flex;gap:3px"><button type="button" data-move-photo="'+i+'" data-direction="-1" aria-label="Переместить фото '+(i+1)+' влево" title="Переместить влево" '+(i===0?'disabled':'')+' style="position:static;border-radius:5px;padding:2px 7px">←</button><button type="button" data-move-photo="'+i+'" data-direction="1" aria-label="Переместить фото '+(i+1)+' вправо" title="Переместить вправо" '+(i===kept.length-1?'disabled':'')+' style="position:static;border-radius:5px;padding:2px 7px">→</button></span><button type="button" data-remove-photo="'+i+'" aria-label="Удалить сохранённое фото '+(i+1)+'">×</button></div>').join("")+
   files.map((file,i)=>'<div class="thumb"><img src="'+URL.createObjectURL(file)+'" alt="Новое фото"><button type="button" data-remove-new="'+i+'" aria-label="Убрать новое фото '+(i+1)+'">×</button></div>').join("");
  preview.innerHTML='<div class="thumbs">'+thumbs+'</div><small>'+count+' из 15 фотографий</small>';
+ preview.querySelectorAll("[data-move-photo]").forEach(btn=>btn.addEventListener("click",()=>{
+  const arr=JSON.parse(input.dataset.galleryUrls||"[]"),from=Number(btn.dataset.movePhoto),to=from+Number(btn.dataset.direction);
+  if(to<0||to>=arr.length)return;
+  [arr[from],arr[to]]=[arr[to],arr[from]];
+  input.dataset.galleryUrls=JSON.stringify(arr);
+  renderPortfolioPhotos();
+ }));
  preview.querySelectorAll("[data-remove-photo]").forEach(btn=>btn.addEventListener("click",()=>{
   const arr=JSON.parse(input.dataset.galleryUrls||"[]");arr.splice(Number(btn.dataset.removePhoto),1);input.dataset.galleryUrls=JSON.stringify(arr);if(!arr.length&&input.dataset.originalGalleryUrls==="[]")$("portfolioImage").value="";renderPortfolioPhotos();
  }));
