@@ -20,7 +20,7 @@ let rows=defaults.map(x=>({...x}));
 function renderTable(rootId,items,group){
  const root=$(rootId);if(!root)return;
  root.innerHTML=items.map((r,i)=>'<tr>'+
- (group==='sip'&&i===0?'<td class="sip-package" rowspan="6">'+packageText+'</td>':'')+
+ (i===0?'<td class="sip-package" rowspan="'+(group==='sip'?6:3)+'">'+packageText+'</td>':'')+
  '<td>'+r.length+'</td><td>'+r.width+'</td><td>'+r.thickness+'</td><td>'+r.osb+'</td><td>'+money(r.retail)+'</td><td>'+money(r.bulk)+'</td>'+
  '<td><div class="sip-qty-control"><button type="button" data-minus="'+group+'-'+i+'" aria-label="Уменьшить количество">−</button><input type="number" min="0" step="1" value="'+r.qty+'" data-qty="'+group+'-'+i+'" aria-label="Количество панелей"><button type="button" data-plus="'+group+'-'+i+'" aria-label="Увеличить количество">+</button></div></td>'+
  '<td class="sip-row-cost">'+money(r.qty*(r.qty>=50?r.bulk:r.retail))+'</td></tr>').join('');
