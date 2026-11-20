@@ -8,7 +8,7 @@ const defaults=[
  {length:2800,width:1250,thickness:174,osb:12,retail:5490,bulk:5050,qty:0},
  {length:2800,width:1250,thickness:224,osb:12,retail:6150,bulk:5650,qty:0}
 ];
-const packageText='1. OSB-3 — Муром (Россия), Экодом E 0,5<br>2. Клей — NanoTech (совместное предприятие Россия–Германия)<br>3. Фасадный негорючий пенополистирол ППС-Ф. Самозатухающий, с антипиренами.';
+const packageText='1. OSB-3 — Калевала (Россия), Экодом E 0,5&nbsp; 12мм<br>2. Клей — Adhesive-SIP 5-20LV<br>3. Фасадный негорючий пенополистирол ППС-Ф.<br><br>Самозатухающий, с антипиренами.';
 const $=id=>document.getElementById(id),money=n=>Number(n||0).toLocaleString('ru-RU').replace(/[\u00a0\u202f]/g,' ');
 let rows=defaults.map(x=>({...x}));
 function render(){
