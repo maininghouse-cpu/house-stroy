@@ -31,7 +31,8 @@
 .sip-qty-control{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
 .sip-qty-control button{width:38px;height:38px;border:0;background:#b82025;color:white;font-size:22px;font-weight:700;cursor:pointer}
 .sip-qty-control button:hover{background:#961a1f}.sip-qty-control input{width:54px;height:38px;box-sizing:border-box;border:1px solid var(--line);background:var(--bg,#fff);color:var(--text);text-align:center;font:inherit;font-variant-numeric:tabular-nums}
-.sip-row-cost,.sip-total{font-variant-numeric:tabular-nums;white-space:nowrap}.sip-price-table tfoot th{font-size:16px;background:rgba(128,128,128,.09)}.sip-total-label{text-align:right}
+.sip-row-cost,.sip-total{font-variant-numeric:tabular-nums;white-space:nowrap}.sip-price-table tfoot th{font-size:16px;background:rgba(128,128,128,.09)}
+.sip-greenboard-heading{padding-top:26px;border-top:1px solid var(--line);margin-top:8px}.sip-total-label{text-align:right}
 .sip-loading{text-align:center;padding:24px!important;color:var(--muted)}.sip-price-footnote{padding:12px 20px 18px;color:var(--muted);font-size:13px;line-height:1.5}
 @media(max-width:760px){.sip-calc{margin-left:-4px;margin-right:-4px}.sip-calc-heading{padding:18px 15px 8px}.sip-price-table{font-size:14px}.sip-price-table th,.sip-price-table td{padding:10px 8px}}
 
@@ -60,6 +61,9 @@
     <tbody id="sipPriceRows"><tr><td colspan="9" class="sip-loading">Загружаем прайс…</td></tr></tbody>
     <tfoot><tr><th colspan="7" class="sip-total-label">Итого:</th><th id="sipTotalQty">0</th><th id="sipTotalCost">0</th></tr></tfoot>
   </table></div>
+
+  <div class="sip-calc-heading sip-greenboard-heading"><h2>СИП панели из Гринборда</h2><p>Выберите количество панелей — стоимость добавится к общему расчёту вместе с панелями из первой таблицы.</p></div>
+  <div class="sip-table-scroll"><table class="sip-price-table"><thead><tr><th>Комплектация</th><th>Длина, мм</th><th>Ширина, мм</th><th>Толщина, мм</th><th>Толщина OSB, мм</th><th>Цена 1–49 шт., руб.</th><th>Цена от 50 шт., руб.</th><th>Количество, шт.</th><th>Стоимость, руб.</th></tr></thead><tbody id="greenboardPriceRows"><tr><td colspan="9" class="sip-loading">Загружаем прайс…</td></tr></tbody></table></div>
   <div class="sip-price-footnote">Цены указаны без НДС. Итоговая стоимость рассчитывается по выбранному количеству панелей и соответствующей ценовой категории.</div>
   <form class="sip-estimate-form" id="sipEstimateForm">
     <h3>Отправить расчёт на почту</h3>
@@ -84,5 +88,5 @@
 </div></section>
 </main>
 <footer><div class="wrap foot"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span><b>HOUSE</b> STROY</a><small>© 2026 HOUSE STROY · Загородные дома под ключ</small><nav><a href="projects.html">Проекты</a><a href="portfolio.html">Портфолио</a><a href="interesting.html">Интересное</a><a href="sip-panel-prices.html">Цены СИП</a><a href="contacts.html">Контакты</a><a href="admin.html">Админ-панель</a></nav></div></footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script><script src="assets/supabase-config.js?v=20261112-4"></script><script src="assets/sip-panel-prices.js?v=20261120-no-phone-check-photo"></script><script src="assets/site.js?v=20261112-theme-fix1"></script><script src="assets/reviews-dropdown.js?v=20261114-fix2"></script><script src="assets/legal.js?v=20261112-1"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script><script src="assets/supabase-config.js?v=20261112-4"></script><script src="assets/sip-panel-prices.js?v=20261120-greenboard-table"></script><script src="assets/site.js?v=20261112-theme-fix1"></script><script src="assets/reviews-dropdown.js?v=20261114-fix2"></script><script src="assets/legal.js?v=20261112-1"></script>
 </body></html>
