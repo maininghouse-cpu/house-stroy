@@ -20,10 +20,27 @@ async function loadProjects() {
  if(error)throw error; projects=(data||[]).map(mapProject); renderList();
 }
 function renderList(){
- $("projectList").innerHTML=projects.map(p=>{const active=p.id===currentId;return '<div class="project-row'+(active?" is-editing":"")+'" '+(active?'aria-current="true"':"")+'><span>'+escapeHtml(p.name)+'<br><small>'+(active?"СЕЙЧАС РЕДАКТИРУЕТСЯ":(p.published?"Опубликован":"Черновик"))+'</small></span><button class="secondary" type="button" data-edit="'+p.id+'">'+(active?"Выбран":"Изменить")+'</button></div>'}).join("")||"<p>Проектов пока нет.</p>";
- document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>loadForm(b.dataset.edit));
- const indicator=$("editingIndicator"),label=$("editingIndicatorText"),active=projects.find(p=>p.id===currentId);if(indicator){indicator.classList.toggle("hidden",!active);if(label)label.textContent=active?"Сейчас редактируется: "+active.name:"";}
-}
+  $("projectList").innerHTML=projects.map((p,i)=>{const active=p.id===currentId;return '<div class="project-row'+(active?" is-editing":"")+'" '+(active?'aria-current="true"':"")+'><span>'+escapeHtml(p.name)+'<br><small>'+(active?"СЕЙЧАС РЕДАКТИРУЕТСЯ":(p.published?"Опубликован":"Черновик"))+'</small></span><span style="display:flex;gap:4px;align-items:center;flex-wrap:wrap"><button class="secondary" type="button" data-project-move="'+i+'" data-direction="-1" title="Переместить выше" aria-label="Переместить '+escapeHtml(p.name)+' выше" '+(i===0?"disabled":"")+' style="min-width:34px;padding:7px 10px">↑</button><button class="secondary" type="button" data-project-move="'+i+'" data-direction="1" title="Переместить ниже" aria-label="Переместить '+escapeHtml(p.name)+' ниже" '+(i===projects.length-1?"disabled":"")+' style="min-width:34px;padding:7px 10px">↓</button><button class="secondary" type="button" data-edit="'+p.id+'">'+(active?"Выбран":"Изменить")+'</button></span></div>'}).join("")||"<p>Проектов пока нет.</p>";
+  document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>loadForm(b.dataset.edit));
+  document.querySelectorAll("[data-project-move]").forEach(b=>b.onclick=async()=>{
+   const from=Number(b.dataset.projectMove),to=from+Number(b.dataset.direction);
+   if(to<0||to>=projects.length)return;
+   const reordered=[...projects];[reordered[from],reordered[to]]=[reordered[to],reordered[from]];
+   document.querySelectorAll("[data-project-move]").forEach(x=>x.disabled=true);
+   try{
+    for(let i=0;i<reordered.length;i++){
+     const {error}=await sb.from("projects").update({sort_order:(i+1)*10}).eq("id",reordered[i].id);
+     if(error)throw error;
+    }
+    await loadProjects();
+    status("editorStatus","Порядок проектов сохранён и обновлён в каталоге.");
+   }catch(err){
+    status("editorStatus","Не удалось изменить порядок проектов: "+err.message,true);
+    try{await loadProjects();}catch{}
+   }
+  });
+  const indicator=$("editingIndicator"),label=$("editingIndicatorText"),active=projects.find(p=>p.id===currentId);if(indicator){indicator.classList.toggle("hidden",!active);if(label)label.textContent=active?"Сейчас редактируется: "+active.name:"";}
+ }
 const DRAFT_KEY="houseStroyProjectDraft:v2";
 function saveDraft(){
  try{
