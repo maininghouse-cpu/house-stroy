@@ -79,8 +79,9 @@ function clearForm(){
 function renderThumbs(key){
  const target=$(key==="cover"?"coverPreview":key+"Thumbs"); if(!target)return;
  const list=key==="cover"?(cover?[cover]:[]):media[key];
- target.innerHTML=list.map((item,i)=>'<div class="thumb"><img src="'+escapeHtml(item.url||"")+'" alt=""><button type="button" data-remove="'+key+'" data-index="'+i+'">×</button></div>').join("");
- target.querySelectorAll("[data-remove]").forEach(b=>b.onclick=()=>{const k=b.dataset.remove,idx=Number(b.dataset.index);if(k==="cover")cover=null;else media[k].splice(idx,1);renderThumbs(k);});
+ target.innerHTML=list.map((item,i)=>'<div class="thumb" style="display:flex;flex-direction:column;gap:6px"><img src="'+escapeHtml(item.url||"")+'" alt=""><div style="display:flex;justify-content:center;align-items:center;gap:6px"><button class="secondary" type="button" data-media-move="'+key+'" data-index="'+i+'" data-direction="-1" title="Переместить фото влево/выше" aria-label="Переместить фото '+(i+1)+' выше" '+(i===0?'disabled':'')+' style="min-width:34px;padding:5px 9px">↑</button><span style="font-size:12px;color:#777">'+(i+1)+' / '+list.length+'</span><button class="secondary" type="button" data-media-move="'+key+'" data-index="'+i+'" data-direction="1" title="Переместить фото вправо/ниже" aria-label="Переместить фото '+(i+1)+' ниже" '+(i===list.length-1?'disabled':'')+' style="min-width:34px;padding:5px 9px">↓</button><button type="button" data-remove="'+key+'" data-index="'+i+'" aria-label="Удалить фото '+(i+1)+'">×</button></div></div>').join("");
+ target.querySelectorAll("[data-remove]").forEach(b=>b.onclick=()=>{const k=b.dataset.remove,idx=Number(b.dataset.index);if(k==="cover")cover=null;else media[k].splice(idx,1);renderThumbs(k);saveDraft();});
+ target.querySelectorAll("[data-media-move]").forEach(b=>b.onclick=()=>{const k=b.dataset.mediaMove,from=Number(b.dataset.index),to=from+Number(b.dataset.direction);if(!media[k]||to<0||to>=media[k].length)return;[media[k][from],media[k][to]]=[media[k][to],media[k][from]];renderThumbs(k);saveDraft();status("editorStatus","Порядок фотографий изменён. Нажмите «Сохранить проект», чтобы применить изменения на сайте.");});
 }
 function loadForm(id){
  const p=projects.find(x=>x.id===id);if(!p)return;currentId=p.id;cover=p.cover?{...p.cover}:null;
