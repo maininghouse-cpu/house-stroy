@@ -15,7 +15,7 @@ function mapRow(row,mediaRows){
  const cover=spec.cover_path?publicUrl(spec.cover_path):(spec.cover_url||media.threeD[0]||media.photos[0]||media.images[0]||"");
  const basePrice=Number(row.price)||0;
  return {
-  id:row.id,slug:row.slug,name:row.title||"Проект дома",
+  id:row.id,slug:row.slug,name:row.title||"Проект дома",featured:row.is_featured===true,
   description:row.description||row.short_description||"",
   sipDescription:spec.sip_description||row.description||row.short_description||"",
   frameDescription:spec.frame_description||row.description||row.short_description||"",
@@ -62,8 +62,11 @@ function card(p){
  return '<a class="card project-card" href="'+href+'"><img src="'+esc(p.cover)+'" alt="'+esc(p.name)+'" loading="lazy"><div class="card-body"><h3>'+esc(p.name)+'</h3><p>'+esc(descriptionFor(p,type))+'</p><div class="project-stats"><div class="project-stat"><strong>'+esc(p.totalArea)+' м²</strong><span>Общая площадь</span></div><div class="project-stat"><strong>'+esc(p.dimensions||"—")+'</strong><span>Размеры</span></div><div class="project-stat"><strong>🛏️ '+esc(p.bedrooms)+'</strong><span>Спальни</span></div><div class="project-stat"><strong>🚿 '+esc(p.bathrooms)+'</strong><span>Санузлы</span></div></div><div class="meta"><b class="price">'+money(priceFor(p,type))+'</b></div></div></a>';
 }
 function render(){
+ const path=window.location.pathname.replace(/\/+$/, "");
+ const isHome=path===""||path==="/"||path.endsWith("/index.html");
  document.querySelectorAll("[data-project-list]").forEach(el=>{
-  el.innerHTML=cache.map(card).join("")||'<p>Опубликованных проектов пока нет.</p>';
+  const visible=isHome?cache.filter(p=>p.featured):cache;
+  el.innerHTML=visible.map(card).join("")||(isHome?"<p>Скоро здесь появятся избранные проекты.</p>":"<p>Опубликованных проектов пока нет.</p>");
  });
 }
 function filterSetup(){
