@@ -63,7 +63,7 @@ function card(p){
 }
 function render(){
  const path=window.location.pathname.replace(/\/+$/, "");
- const isHome=path===""||path==="/"||path.endsWith("/index.html");
+ const isHome=path===""||path==="/"||path.endsWith("/index.html")||path==="/house-stroy"||path.endsWith("/house-stroy");
  document.querySelectorAll("[data-project-list]").forEach(el=>{
   const visible=isHome?cache.filter(p=>p.featured):cache;
   el.innerHTML=visible.map(card).join("")||(isHome?"<p>Скоро здесь появятся избранные проекты.</p>":"<p>Опубликованных проектов пока нет.</p>");
