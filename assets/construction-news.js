@@ -98,5 +98,7 @@
       render();
     }
   }
+  // Show the lightweight built-in preview immediately; replace it with live data when Supabase responds.
+  render();
   load();
 })();
