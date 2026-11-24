@@ -48,7 +48,7 @@
       const detailUrl = item.id && item.news_date !== undefined ? "news.html?id=" + encodeURIComponent(item.id) : "portfolio.html";
       return '<article class="construction-news-card">' +
         '<a class="construction-news-image" href="' + esc(detailUrl) + '" aria-label="Открыть новость: ' + esc(title) + '">' +
-          (image ? '<img src="' + esc(image) + '" alt="' + esc(title) + ' — фотографии объекта HOUSE STROY" loading="lazy">' : '<span class="construction-news-noimage">Фото объекта скоро появится</span>') +
+          (image ? '<img src="' + esc(image) + '" alt="' + esc(title) + ' — фотографии объекта HOUSE STROY" loading="lazy" decoding="async">' : '<span class="construction-news-noimage">Фото объекта скоро появится</span>') +
           '<span class="construction-news-status ' + status + '">' + statusLabel + '</span>' +
           (photoCount > 1 ? '<span class="construction-news-count">+' + (photoCount - 1) + ' фото</span>' : '') +
         '</a>' +
