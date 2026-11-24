@@ -81,7 +81,7 @@ function filterSetup(){
  const run=()=>{
   const v=id=>document.getElementById(id)?.value||"";
   ["buildType","floorFilter"].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle("is-selected",!!el.value);});
-  const query=v("nameSearch").trim().toLocaleLowerCase("ru-RU").replace(/ё/g,"е").replace(/\\s+/g," ");
+  const query=v("nameSearch").trim().toLocaleLowerCase("ru-RU").replace(/ё/g,"е").replace(/\s+/g," ");
   const found=cache.filter(p=>
    (!query||String(p.name||"").toLocaleLowerCase("ru-RU").replace(/ё/g,"е").includes(query))&&
    (!v("areaMin")||p.totalArea>=Number(v("areaMin")))&&
