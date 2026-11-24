@@ -34,7 +34,7 @@ function mapRow(row,mediaRows){
 }
 async function load(){
  if(!sb)throw new Error("Не инициализировано подключение к базе данных");
- const {data:rows,error}=await sb.from("projects").select("id,slug,title,description,short_description,price,total_area,living_area,floors,bedrooms,bathrooms,balconies,is_featured,specifications,sort_order,created_at").eq("is_published",true).order("sort_order").order("created_at",{ascending:false});
+ const {data:rows,error}=await sb.from("projects").select("id,slug,title,description,short_description,price,total_area,living_area,floors,bedrooms,bathrooms,is_featured,specifications,sort_order,created_at").eq("is_published",true).order("sort_order").order("created_at",{ascending:false});
  if(error)throw error;
  const projects=rows||[];
  let mediaRows=[];
