@@ -1,7 +1,12 @@
 (function(){
 "use strict";
 const FALLBACK=[];
+const CACHE_KEY="house-stroy-public-projects-v2";
+const CACHE_TTL=120000;
 let cache=FALLBACK;
+let hasCachedProjects=false;
+function readCache(){try{const saved=JSON.parse(localStorage.getItem(CACHE_KEY)||"null");if(saved&&Array.isArray(saved.projects)){cache=saved.projects;hasCachedProjects=cache.length>0;return true;}}catch(e){console.warn("Project cache:",e);}return false;}
+function writeCache(projects){try{localStorage.setItem(CACHE_KEY,JSON.stringify({savedAt:Date.now(),projects}));}catch(e){console.warn("Project cache storage:",e);}}
 const sb=window.houseStroyClient;
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function money(n){const value=Number(n);return (Number.isFinite(value)?value:0).toLocaleString("ru-RU").replace(/[\u00a0\u202f]/g," ")+" руб."; }
@@ -30,16 +35,18 @@ function mapRow(row,mediaRows){
 }
 async function load(){
  if(!sb)throw new Error("Не инициализировано подключение к базе данных");
- const {data:rows,error}=await sb.from("projects").select("*").eq("is_published",true).order("sort_order").order("created_at",{ascending:false});
+ const {data:rows,error}=await sb.from("projects").select("id,slug,title,description,short_description,price,total_area,living_area,floors,bedrooms,bathrooms,balconies,is_featured,specifications,sort_order,created_at").eq("is_published",true).order("sort_order").order("created_at",{ascending:false});
  if(error)throw error;
  const projects=rows||[];
  let mediaRows=[];
  if(projects.length){
-  const {data,error:mediaError}=await sb.from("project_media").select("*").in("project_id",projects.map(p=>p.id));
+  const {data,error:mediaError}=await sb.from("project_media").select("project_id,category,storage_path,sort_order").in("project_id",projects.map(p=>p.id));
   if(mediaError)console.warn("Project media:",mediaError);
   else mediaRows=mediaRows.concat(data||[]);
  }
  cache=projects.map(row=>mapRow(row,mediaRows));
+ hasCachedProjects=cache.length>0;
+ writeCache(cache);
  return cache;
 }
 function get(){return cache;}
@@ -102,15 +109,17 @@ async function init(){
  const list=document.querySelector("[data-project-list]");
  // The detail page uses HouseProjects.load() itself; do not start a second catalogue request there.
  if(!list)return;
- if(list)list.innerHTML="<p>Загружаем проекты…</p>";
+ readCache();
+ if(!hasCachedProjects&&list)list.innerHTML="<p>Загружаем проекты…</p>";
  const run=filterSetup();
+ if(hasCachedProjects){render();if(run)run();}
  try{
   await load();
   render();
   if(run)run();
  }catch(e){
-  console.error("HOUSE STROY: ошибка загрузки проектов",e);
-  if(list)list.innerHTML="<p>Не удалось загрузить проекты. Проверьте подключение и обновите страницу.</p>";
+  console.warn("HOUSE STROY: обновление проектов не удалось",e);
+  if(!hasCachedProjects&&list)list.innerHTML="<p>Не удалось загрузить проекты. Проверьте подключение и обновите страницу.</p>";
  }
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});
