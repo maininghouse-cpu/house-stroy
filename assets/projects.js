@@ -2,7 +2,6 @@
 "use strict";
 const FALLBACK=[];
 const CACHE_KEY="house-stroy-public-projects-v2";
-const CACHE_TTL=120000;
 let cache=FALLBACK;
 let hasCachedProjects=false;
 function readCache(){try{const saved=JSON.parse(localStorage.getItem(CACHE_KEY)||"null");if(saved&&Array.isArray(saved.projects)){cache=saved.projects;hasCachedProjects=cache.length>0;return true;}}catch(e){console.warn("Project cache:",e);}return false;}
@@ -66,7 +65,7 @@ function descriptionFor(p,type=selectedType()){
 function card(p){
  const type=selectedType();
  const href="project.html?id="+encodeURIComponent(p.id)+(type?"&type="+encodeURIComponent(type):"");
- return '<a class="card project-card" href="'+href+'"><img src="'+esc(p.cover)+'" alt="'+esc(p.name)+'" loading="lazy"><div class="card-body"><h3>'+esc(p.name)+'</h3><p>'+esc(descriptionFor(p,type))+'</p><div class="project-stats"><div class="project-stat"><strong>'+esc(p.totalArea)+' м²</strong><span>Общая площадь</span></div><div class="project-stat"><strong>'+esc(p.dimensions||"—")+'</strong><span>Размеры</span></div><div class="project-stat"><strong>🛏️ '+esc(p.bedrooms)+'</strong><span>Спальни</span></div><div class="project-stat"><strong>🚿 '+esc(p.bathrooms)+'</strong><span>Санузлы</span></div></div><div class="meta"><b class="price">'+money(priceFor(p,type))+'</b></div></div></a>';
+ return '<a class="card project-card" href="'+href+'"><img src="'+esc(p.cover)+'" alt="'+esc(p.name)+'" loading="lazy" decoding="async"><div class="card-body"><h3>'+esc(p.name)+'</h3><p>'+esc(descriptionFor(p,type))+'</p><div class="project-stats"><div class="project-stat"><strong>'+esc(p.totalArea)+' м²</strong><span>Общая площадь</span></div><div class="project-stat"><strong>'+esc(p.dimensions||"—")+'</strong><span>Размеры</span></div><div class="project-stat"><strong>🛏️ '+esc(p.bedrooms)+'</strong><span>Спальни</span></div><div class="project-stat"><strong>🚿 '+esc(p.bathrooms)+'</strong><span>Санузлы</span></div></div><div class="meta"><b class="price">'+money(priceFor(p,type))+'</b></div></div></a>';
 }
 function render(){
  const path=window.location.pathname.replace(/\/+$/, "");
