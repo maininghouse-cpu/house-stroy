@@ -242,6 +242,21 @@ function renderGallery(){
  const index=all.findIndex(x=>String(x.id)===params.get("id")||x.slug===params.get("id"));
  if(index<0){root.innerHTML="<h1>Проект не найден</h1>";return;}
  project=all[index];
+ // Dynamic SEO for each individual project URL.
+ const seoTitle=(project.name||"Проект дома")+" — проект дома из СИП-панелей и каркасный дом | HOUSE STROY";
+ const seoDescription=((project.description||"Проект загородного дома HOUSE STROY.")+" Площадь: "+project.totalArea+" м². "+project.floors+" этаж(а). "+project.bedrooms+" спальни, "+project.bathrooms+" санузла. Планировки, фасады и стоимость строительства.").replace(/\s+/g," ").slice(0,300);
+ document.title=seoTitle;
+ const putMeta=(selector,attr,value)=>{let el=document.querySelector(selector);if(!el){el=document.createElement("meta");const m=selector.match(/\[(name|property)="([^"]+)"\]/);el.setAttribute(m[1],m[2]);document.head.appendChild(el);}el.setAttribute(attr,value);};
+ putMeta('meta[name="description"]',"content",seoDescription);
+ putMeta('meta[property="og:type"]',"content","product");
+ putMeta('meta[property="og:title"]',"content",seoTitle);
+ putMeta('meta[property="og:description"]',"content",seoDescription);
+ putMeta('meta[property="og:url"]',"content","https://pro-ect.ru/project.html?id="+encodeURIComponent(project.id));
+ putMeta('meta[property="og:image"]',"content",project.cover||"https://pro-ect.ru/assets/og-house-stroy.jpg");
+ putMeta('meta[name="twitter:card"]',"content","summary_large_image");
+ let canonical=document.querySelector('link[rel="canonical"]');if(!canonical){canonical=document.createElement("link");canonical.rel="canonical";document.head.appendChild(canonical);}canonical.href="https://pro-ect.ru/project.html?id="+encodeURIComponent(project.id);
+ let schema=document.getElementById("projectSeoSchema");if(!schema){schema=document.createElement("script");schema.type="application/ld+json";schema.id="projectSeoSchema";document.head.appendChild(schema);}
+ schema.textContent=JSON.stringify({"@context":"https://schema.org","@type":"WebPage","name":seoTitle,"description":seoDescription,"url":canonical.href,"image":project.cover||undefined,"isPartOf":{"@type":"WebSite","name":"HOUSE STROY","url":"https://pro-ect.ru/"}});
  const prev=all[index-1],next=all[index+1];
  root.innerHTML='<div class="detail-hero"><img id="cover" src="'+esc(project.cover)+'" alt="'+esc(project.name)+'"><div><div class="eyebrow">Характеристики:</div><h1>'+esc(project.name)+'</h1><p id="projectHeroDescription">'+esc(project.description)+'</p><h2 id="projectHeroPrice">'+Number(project.price||0).toLocaleString("ru-RU").replace(/[\u00a0\u202f]/g," ")+' ₽</h2><div class="specs"><div class="spec primary"><span class="spec-label">Площадь:</span><strong class="spec-value">'+esc(project.totalArea)+' м²</strong></div><div class="spec primary"><span class="spec-label">Размеры:</span><strong class="spec-value">'+esc(project.dimensions||"—")+'</strong></div><div class="spec"><span class="spec-label">Спальни:</span><strong class="spec-value"><svg class="spec-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M8 28h48v25H8zM8 36h48M13 28V17h17a8 8 0 0 1 8 8v3M8 53v5m48-5v5M14 17v-5m0 0a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM50 17v-5m0 0a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>'+esc(project.bedrooms)+'</strong></div><div class="spec"><span class="spec-label">Санузлы:</span><strong class="spec-value"><svg class="spec-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M9 34h46l-4 12a14 14 0 0 1-13 9H26a14 14 0 0 1-13-9L9 34ZM13 34V20a8 8 0 0 1 16 0v5m-8 0h8m-6 30v4m19-4v4M7 34h50M18 42c7 4 21 4 28 0"/></svg>'+esc(project.bathrooms)+'</strong></div></div></div></div>'+
  '<div class="build-type-switch" role="group" aria-label="Выбор технологии строительства"><button type="button" class="build-type-tab" data-build-type="sip">СИП-дом</button><button type="button" class="build-type-tab" data-build-type="frame">Каркасный дом</button></div><div class="tabs"><button data-tab="threeD">3D</button><button data-tab="plans">Планы</button><button data-tab="facades">Фасады</button><button data-tab="photos">Фотографии</button></div>'+
