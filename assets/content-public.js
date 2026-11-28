@@ -42,8 +42,8 @@ async function portfolio(){
   return '<article class="card">'+(images?'<div class="portfolio-gallery">'+images+'</div>':'')+'<div class="card-body"><h3>'+esc(x.title)+'</h3><p>'+esc(x.description||"")+'</p><div class="meta">'+(x.area?'<span>'+esc(x.area)+' м²</span>':'')+(x.style?'<span>'+esc(x.style)+'</span>':'')+'</div></div></article>';
  }).join("")||"<p>Портфолио скоро пополнится новыми объектами.</p>";
  root.querySelectorAll(".portfolio-photo").forEach(btn=>btn.addEventListener("click",()=>{
-  const x=data[Number(btn.dataset.card)],urls=x.gallery_urls&&x.gallery_urls.length?x.gallery_urls:(x.image_url?[x.image_url]:[]);
-  openViewer(urls.map((url)=>({url,title:x.title})),Number(btn.dataset.photo));
+  const x=data[Number(btn.dataset.card)];
+  window.location.href="portfolio-item.html?id="+encodeURIComponent(x.id);
  }));
 }
 
