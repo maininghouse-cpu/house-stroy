@@ -12,7 +12,7 @@ const backEl=document.querySelector("[data-video-back]");
 if(backEl)backEl.href=back;
 function embed(value){
  try{const u=new URL(value);if(u.hostname.endsWith("vkvideo.ru")||u.hostname.endsWith("vk.com")||u.hostname.endsWith("vk.ru")){
-  let url;if(u.pathname.includes("video_ext.php"))url=u;else{const m=u.pathname.match(/video(-?\\d+)_(\\d+)/);if(!m)return null;url=new URL("https://vk.com/video_ext.php");url.searchParams.set("oid",m[1]);url.searchParams.set("id",m[2]);url.searchParams.set("hd","2");}
+  let url;if(u.pathname.includes("video_ext.php"))url=u;else{const m=u.pathname.match(/video(-?\d+)_(\d+)/);if(!m)return null;url=new URL("https://vk.com/video_ext.php");url.searchParams.set("oid",m[1]);url.searchParams.set("id",m[2]);url.searchParams.set("hd","2");}
   url.searchParams.set("autoplay","1");return url.href;
  }}catch{}return null;
 }
