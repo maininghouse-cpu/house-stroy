@@ -32,6 +32,11 @@ async function init(){
  const canonical="https://pro-ect.ru/video-item.html?view="+mode+"&id="+encodeURIComponent(id);
  let link=document.querySelector('link[rel="canonical"]');if(link)link.href=canonical;
  setMeta('meta[property="og:url"]',"content",canonical);
+ setMeta('meta[name="twitter:card"]',"content","summary");
+ setMeta('meta[name="twitter:title"]',"content",pageTitle);
+ setMeta('meta[name="twitter:description"]',"content",description.slice(0,200));
+ let schema=document.getElementById("videoSeoSchema");if(!schema){schema=document.createElement("script");schema.type="application/ld+json";schema.id="videoSeoSchema";document.head.appendChild(schema);}
+ schema.textContent=JSON.stringify({"@context":"https://schema.org","@type":"VideoObject","name":data.title||"Видео HOUSE STROY","description":description.slice(0,300),"embedUrl":src,"url":canonical,"publisher":{"@type":"Organization","name":"HOUSE STROY","url":"https://pro-ect.ru/"}});
  root.innerHTML='<div class="review-video-detail-frame"><iframe src="'+esc(src)+'" title="'+esc(data.title||"Видео HOUSE STROY")+'" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe></div><h1>'+esc(data.title||"Видео HOUSE STROY")+'</h1><div class="review-video-detail-description">'+esc(description)+'</div>';
 }
 init();
