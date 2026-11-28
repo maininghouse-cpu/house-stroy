@@ -10,6 +10,22 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
  const status=data.construction_status==="building"?"Строится":"Построен";
  const meta=[data.news_date,data.construction_location,data.style,status].filter(Boolean);
  document.title=data.title+" — HOUSE STROY";
+ const seoDescription=[data.title,data.construction_location,data.style,data.construction_stage].filter(Boolean).join(". ").slice(0,300);
+ const canonical="https://pro-ect.ru/news.html?id="+encodeURIComponent(id);
+ const setMeta=(selector,attr,value)=>{let el=document.querySelector(selector);if(!el){el=document.createElement("meta");const m=selector.match(/\[(name|property)="([^"]+)"\]/);el.setAttribute(m[1],m[2]);document.head.appendChild(el);}el.setAttribute(attr,value);};
+ setMeta('meta[name="description"]',"content",seoDescription);
+ setMeta('meta[property="og:type"]',"content","article");
+ setMeta('meta[property="og:title"]',"content",document.title);
+ setMeta('meta[property="og:description"]',"content",seoDescription);
+ setMeta('meta[property="og:url"]',"content",canonical);
+ if(photos[0])setMeta('meta[property="og:image"]',"content",photos[0]);
+ setMeta('meta[name="twitter:card"]',"content",photos[0]?"summary_large_image":"summary");
+ setMeta('meta[name="twitter:title"]',"content",document.title);
+ setMeta('meta[name="twitter:description"]',"content",seoDescription);
+ if(photos[0])setMeta('meta[name="twitter:image"]',"content",photos[0]);
+ let canonicalLink=document.querySelector('link[rel="canonical"]');if(!canonicalLink){canonicalLink=document.createElement("link");canonicalLink.rel="canonical";document.head.appendChild(canonicalLink);}canonicalLink.href=canonical;
+ let schema=document.getElementById("newsSeoSchema");if(!schema){schema=document.createElement("script");schema.type="application/ld+json";schema.id="newsSeoSchema";document.head.appendChild(schema);}
+ schema.textContent=JSON.stringify({"@context":"https://schema.org","@type":"Article","headline":data.title,"description":seoDescription,"image":photos,"mainEntityOfPage":canonical,"publisher":{"@type":"Organization","name":"HOUSE STROY","url":"https://pro-ect.ru/"}});
  root.innerHTML='<div class="eyebrow-dark">НОВОСТИ КОМПАНИИ</div><h1>'+esc(data.title)+'</h1><div class="news-meta">'+meta.map(x=>'<span>'+esc(x)+'</span>').join("")+'</div>'+
  (photos.length?'<style>'+
  '.news-photo-gallery{margin:28px 0 34px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}'+
