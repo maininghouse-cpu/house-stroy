@@ -4,7 +4,7 @@ const root=document.querySelector("[data-portfolio-detail]");
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const params=new URLSearchParams(location.search);
 const id=params.get("id");
-let images=[],index=0;
+let images=[],index=0,projectNavigation=[];
 const titleEl=document.querySelector("[data-detail-title]");
 function setMeta(name,content,property=false){
  let el=document.querySelector(property?'meta[property="'+name+'"]':'meta[name="'+name+'"]');
@@ -45,8 +45,12 @@ function openViewer(){
 }
 async function init(){
  if(!sb||!id){root.innerHTML="<p>Объект не найден. Вернитесь в <a href='portfolio.html'>портфолио</a>.</p>";return;}
- const {data:x,error}=await sb.from("portfolio_items").select("*").eq("id",id).eq("is_published",true).maybeSingle();
+ const [{data:x,error},{data:items}] = await Promise.all([
+  sb.from("portfolio_items").select("*").eq("id",id).eq("is_published",true).maybeSingle(),
+  sb.from("portfolio_items").select("id,title").eq("is_published",true).order("sort_order",{ascending:true}).order("created_at",{ascending:false})
+ ]);
  if(error||!x){root.innerHTML="<p>Не удалось найти этот объект. Возможно, он был снят с публикации. <a href='portfolio.html'>Вернуться в портфолио</a>.</p>";return;}
+ projectNavigation=items||[];
  images=(x.gallery_urls&&x.gallery_urls.length?x.gallery_urls:(x.image_url?[x.image_url]:[])).filter(Boolean);
  titleEl.textContent=x.title||"Построенный дом";
  document.title=(x.title||"Построенный дом")+" — портфолио HOUSE STROY";
@@ -64,7 +68,12 @@ async function init(){
  schema.textContent=JSON.stringify({"@context":"https://schema.org","@type":"Article","headline":titleEl.textContent,"description":description.slice(0,300),"image":images,"mainEntityOfPage":location.href,"publisher":{"@type":"Organization","name":"HOUSE STROY","url":"https://pro-ect.ru/"}});
  let canonical=document.querySelector('link[rel="canonical"]');if(canonical)canonical.href=location.href;
  root.innerHTML=(images.length?'<div class="portfolio-detail-gallery"><div class="portfolio-detail-stage"><button class="portfolio-detail-arrow portfolio-detail-prev" type="button" aria-label="Предыдущее фото">‹</button><img class="portfolio-detail-main-image" src="'+esc(images[0])+'" alt="'+esc(x.title)+' — фото 1"><button class="portfolio-detail-arrow portfolio-detail-next" type="button" aria-label="Следующее фото">›</button><span class="portfolio-detail-counter">1 / '+images.length+'</span></div><div class="portfolio-detail-thumbs" aria-label="Все фотографии объекта">'+images.map((url,i)=>'<button class="portfolio-detail-thumb '+(i===0?'is-active':'')+'" type="button" data-index="'+i+'" aria-label="Открыть фото '+(i+1)+'" aria-current="'+(i===0?'true':'false')+'"><img src="'+esc(url)+'" alt="" loading="lazy"></button>').join("")+'</div></div>':'<p class="portfolio-detail-no-photos">Для этого объекта фотографии пока не добавлены.</p>')+
- '<article class="portfolio-detail-description"><div class="eyebrow-dark">HOUSE STROY / РЕАЛИЗОВАННЫЙ ПРОЕКТ</div><h2>О доме</h2><p>'+esc(description)+'</p><div class="portfolio-detail-meta">'+(x.area?'<span>'+esc(x.area)+' м²</span>':'')+(x.style?'<span>'+esc(x.style)+'</span>':'')+(x.construction_location?'<span>'+esc(x.construction_location)+'</span>':'')+'</div><a class="btn" href="contacts.html">Обсудить строительство дома ↗</a></article>';
+ '<article class="portfolio-detail-description"><div class="eyebrow-dark">HOUSE STROY / РЕАЛИЗОВАННЫЙ ПРОЕКТ</div><h2>О доме</h2><p>'+esc(description)+'</p><div class="portfolio-detail-meta">'+(x.area?'<span>'+esc(x.area)+' м²</span>':'')+(x.style?'<span>'+esc(x.style)+'</span>':'')+(x.construction_location?'<span>'+esc(x.construction_location)+'</span>':'')+'</div><a class="btn" href="contacts.html">Обсудить строительство дома ↗</a><nav class="portfolio-project-navigation" aria-label="Переход между проектами"><a class="portfolio-project-nav-link portfolio-project-prev" href="#" aria-label="Предыдущий проект">← Предыдущий проект</a><a class="portfolio-project-nav-link portfolio-project-all" href="portfolio.html">Все проекты портфолио</a><a class="portfolio-project-nav-link portfolio-project-next" href="#" aria-label="Следующий проект">Следующий проект →</a></nav></article>';
+ const currentProjectIndex=projectNavigation.findIndex(item=>String(item.id)===String(id));
+ const previousProject=projectNavigation[currentProjectIndex-1],nextProject=projectNavigation[currentProjectIndex+1];
+ const previousLink=root.querySelector(".portfolio-project-prev"),nextLink=root.querySelector(".portfolio-project-next");
+ if(previousProject){previousLink.href="portfolio-item.html?id="+encodeURIComponent(previousProject.id);previousLink.textContent="← "+(previousProject.title||"Предыдущий проект");}else{previousLink.hidden=true;}
+ if(nextProject){nextLink.href="portfolio-item.html?id="+encodeURIComponent(nextProject.id);nextLink.textContent=(nextProject.title||"Следующий проект")+" →";}else{nextLink.hidden=true;}
  root.querySelector(".portfolio-detail-prev")?.addEventListener("click",()=>show(index-1));
  root.querySelector(".portfolio-detail-next")?.addEventListener("click",()=>show(index+1));
  root.querySelectorAll(".portfolio-detail-thumb").forEach(b=>b.addEventListener("click",()=>show(Number(b.dataset.index))));
