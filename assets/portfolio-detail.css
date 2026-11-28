@@ -59,3 +59,11 @@ body.portfolio-viewer-open{overflow:hidden}
 .portfolio-project-next .portfolio-project-preview{flex-direction:row-reverse;text-align:right}
 .portfolio-project-all{align-self:center;white-space:nowrap}
 @media(max-width:700px){.portfolio-project-navigation{grid-template-columns:1fr 1fr}.portfolio-project-navigation .portfolio-project-nav-link{min-height:74px;padding:7px}.portfolio-project-preview-image{flex-basis:70px;width:70px;height:54px}.portfolio-project-preview-title{font-size:12px}.portfolio-project-all{grid-column:1/-1;grid-row:1;justify-self:center}.portfolio-project-direction{font-size:17px}}
+
+/* Нижняя навигация: после галереи и описания объекта */
+.portfolio-detail-wrap>.portfolio-project-navigation{grid-column:1/-1;width:100%;margin-top:4px;padding-top:22px}
+.portfolio-project-navigation .portfolio-project-prev{justify-content:flex-start}
+.portfolio-project-navigation .portfolio-project-next{justify-content:flex-end}
+.portfolio-project-navigation .portfolio-project-preview{flex:1}
+.portfolio-project-navigation .portfolio-project-preview-title{overflow-wrap:anywhere}
+@media(max-width:850px){.portfolio-detail-wrap>.portfolio-project-navigation{grid-column:1}}
