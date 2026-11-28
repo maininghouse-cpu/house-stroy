@@ -32,6 +32,14 @@ async function init(){
  setMeta("description",description.slice(0,300));
  setMeta("og:title",document.title,true);setMeta("og:description",description.slice(0,300),true);
  setMeta("og:url",location.href,true);
+ setMeta("og:type","article",true);
+ setMeta("og:image",images[0]||"https://pro-ect.ru/assets/og-house-stroy.jpg",true);
+ setMeta("twitter:card","summary_large_image");
+ setMeta("twitter:title",document.title);
+ setMeta("twitter:description",description.slice(0,200));
+ if(images[0])setMeta("twitter:image",images[0]);
+ let schema=document.getElementById("portfolioSeoSchema");if(!schema){schema=document.createElement("script");schema.type="application/ld+json";schema.id="portfolioSeoSchema";document.head.appendChild(schema);}
+ schema.textContent=JSON.stringify({"@context":"https://schema.org","@type":"Article","headline":titleEl.textContent,"description":description.slice(0,300),"image":images,"mainEntityOfPage":location.href,"publisher":{"@type":"Organization","name":"HOUSE STROY","url":"https://pro-ect.ru/"}});
  let canonical=document.querySelector('link[rel="canonical"]');if(canonical)canonical.href=location.href;
  root.innerHTML=(images.length?'<div class="portfolio-detail-gallery"><div class="portfolio-detail-stage"><button class="portfolio-detail-arrow portfolio-detail-prev" type="button" aria-label="Предыдущее фото">‹</button><img class="portfolio-detail-main-image" src="'+esc(images[0])+'" alt="'+esc(x.title)+' — фото 1"><button class="portfolio-detail-arrow portfolio-detail-next" type="button" aria-label="Следующее фото">›</button><span class="portfolio-detail-counter">1 / '+images.length+'</span></div><div class="portfolio-detail-thumbs" aria-label="Все фотографии объекта">'+images.map((url,i)=>'<button class="portfolio-detail-thumb '+(i===0?'is-active':'')+'" type="button" data-index="'+i+'" aria-label="Открыть фото '+(i+1)+'" aria-current="'+(i===0?'true':'false')+'"><img src="'+esc(url)+'" alt="" loading="lazy"></button>').join("")+'</div></div>':'<p class="portfolio-detail-no-photos">Для этого объекта фотографии пока не добавлены.</p>')+
  '<article class="portfolio-detail-description"><div class="eyebrow-dark">HOUSE STROY / РЕАЛИЗОВАННЫЙ ПРОЕКТ</div><h2>О доме</h2><p>'+esc(description)+'</p><div class="portfolio-detail-meta">'+(x.area?'<span>'+esc(x.area)+' м²</span>':'')+(x.style?'<span>'+esc(x.style)+'</span>':'')+(x.construction_location?'<span>'+esc(x.construction_location)+'</span>':'')+'</div><a class="btn" href="contacts.html">Обсудить строительство дома ↗</a></article>';
