@@ -11,15 +11,37 @@ function setMeta(name,content,property=false){
  if(!el){el=document.createElement("meta");el.setAttribute(property?"property":"name",name);document.head.appendChild(el);}
  el.content=content;
 }
+let lightbox=null;
 function show(next){
  if(!images.length)return;
  index=(next+images.length)%images.length;
  const main=root.querySelector(".portfolio-detail-main-image");
- main.src=images[index];main.alt=titleEl.textContent+" — фото "+(index+1);
- root.querySelector(".portfolio-detail-counter").textContent=(index+1)+" / "+images.length;
+ if(main){main.src=images[index];main.alt=titleEl.textContent+" — фото "+(index+1);}
+ const counter=root.querySelector(".portfolio-detail-counter");
+ if(counter)counter.textContent=(index+1)+" / "+images.length;
  root.querySelectorAll(".portfolio-detail-thumb").forEach((b,i)=>{b.classList.toggle("is-active",i===index);b.setAttribute("aria-current",i===index?"true":"false");if(i===index)b.scrollIntoView({block:"nearest",inline:"nearest"});});
- root.querySelector(".portfolio-detail-prev").hidden=images.length<2;
- root.querySelector(".portfolio-detail-next").hidden=images.length<2;
+ const prev=root.querySelector(".portfolio-detail-prev"),nextBtn=root.querySelector(".portfolio-detail-next");
+ if(prev)prev.hidden=images.length<2;if(nextBtn)nextBtn.hidden=images.length<2;
+ if(lightbox){
+  lightbox.querySelector(".portfolio-viewer-image").src=images[index];
+  lightbox.querySelector(".portfolio-viewer-image").alt=titleEl.textContent+" — фото "+(index+1);
+  lightbox.querySelector(".portfolio-viewer-counter").textContent=(index+1)+" / "+images.length;
+  lightbox.querySelectorAll(".portfolio-viewer-thumb").forEach((b,i)=>{b.classList.toggle("is-active",i===index);if(i===index)b.scrollIntoView({block:"nearest",inline:"nearest"});});
+ }
+}
+function closeViewer(){if(!lightbox)return;lightbox.remove();lightbox=null;document.body.classList.remove("portfolio-viewer-open");}
+function openViewer(){
+ if(!images.length||lightbox)return;
+ lightbox=document.createElement("div");lightbox.className="portfolio-viewer";lightbox.setAttribute("role","dialog");lightbox.setAttribute("aria-modal","true");lightbox.setAttribute("aria-label","Просмотр фотографий объекта");
+ lightbox.innerHTML='<button class="portfolio-viewer-close" type="button" aria-label="Закрыть просмотр">×</button><button class="portfolio-viewer-arrow portfolio-viewer-prev" type="button" aria-label="Предыдущее фото">‹</button><img class="portfolio-viewer-image" alt=""><button class="portfolio-viewer-arrow portfolio-viewer-next" type="button" aria-label="Следующее фото">›</button><div class="portfolio-viewer-bottom"><span class="portfolio-viewer-counter"></span><div class="portfolio-viewer-thumbs" aria-label="Миниатюры фотографий"></div></div>';
+ document.body.appendChild(lightbox);document.body.classList.add("portfolio-viewer-open");
+ const strip=lightbox.querySelector(".portfolio-viewer-thumbs");
+ images.forEach((url,i)=>{const b=document.createElement("button");b.type="button";b.className="portfolio-viewer-thumb";b.setAttribute("aria-label","Открыть фото "+(i+1));b.innerHTML='<img alt="" loading="lazy">';b.querySelector("img").src=url;b.addEventListener("click",()=>show(i));strip.appendChild(b);});
+ lightbox.querySelector(".portfolio-viewer-close").addEventListener("click",closeViewer);
+ lightbox.querySelector(".portfolio-viewer-prev").addEventListener("click",()=>show(index-1));
+ lightbox.querySelector(".portfolio-viewer-next").addEventListener("click",()=>show(index+1));
+ lightbox.addEventListener("click",e=>{if(e.target===lightbox)closeViewer();});
+ show(index);lightbox.querySelector(".portfolio-viewer-close").focus();
 }
 async function init(){
  if(!sb||!id){root.innerHTML="<p>Объект не найден. Вернитесь в <a href='portfolio.html'>портфолио</a>.</p>";return;}
@@ -46,8 +68,9 @@ async function init(){
  root.querySelector(".portfolio-detail-prev")?.addEventListener("click",()=>show(index-1));
  root.querySelector(".portfolio-detail-next")?.addEventListener("click",()=>show(index+1));
  root.querySelectorAll(".portfolio-detail-thumb").forEach(b=>b.addEventListener("click",()=>show(Number(b.dataset.index))));
- root.querySelector(".portfolio-detail-main-image")?.addEventListener("click",()=>{const overlay=document.createElement("div");overlay.className="portfolio-detail-lightbox";overlay.innerHTML='<button type="button" aria-label="Закрыть">×</button><img src="'+esc(images[index])+'" alt="'+esc(x.title)+'">';document.body.appendChild(overlay);const close=()=>overlay.remove();overlay.querySelector("button").onclick=close;overlay.onclick=e=>{if(e.target===overlay)close();};});
- document.addEventListener("keydown",e=>{if(e.key==="ArrowRight")show(index+1);if(e.key==="ArrowLeft")show(index-1);});
+ root.querySelector(".portfolio-detail-main-image")?.addEventListener("click",openViewer);
+ document.addEventListener("keydown",e=>{if(!lightbox)return;if(e.key==="Escape"){e.preventDefault();closeViewer();}else if(e.key==="ArrowRight"){e.preventDefault();show(index+1);}else if(e.key==="ArrowLeft"){e.preventDefault();show(index-1);}});
+ if(images.length)openViewer();
 }
 init();
 })();
