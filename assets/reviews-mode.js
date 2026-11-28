@@ -16,6 +16,18 @@ async function init(){
  const requested=new URLSearchParams(location.search).get("view");
  const mode=requested==="portfolio"?"portfolio":requested==="video"?"video":(data?.value==="portfolio"?"portfolio":"video");
  if(!root)return;
+ const seoTitle=mode==="portfolio"?"Видеообзоры построенных домов — HOUSE STROY":"Видеоотзывы заказчиков о строительстве домов — HOUSE STROY";
+ const seoDescription=mode==="portfolio"?"Смотрите видеообзоры реализованных объектов HOUSE STROY: планировки, фасады и детали построенных загородных домов.":"Смотрите видеоотзывы заказчиков HOUSE STROY о строительстве загородных домов. Реальные впечатления владельцев и опыт сотрудничества.";
+ const seoUrl="https://pro-ect.ru/reviews.html?view="+mode;
+ document.title=seoTitle;
+ let canonical=document.querySelector('link[rel="canonical"]');
+ if(!canonical){canonical=document.createElement("link");canonical.rel="canonical";document.head.appendChild(canonical);}
+ canonical.href=seoUrl;
+ const setMeta=(selector,attr,value)=>{let el=document.querySelector(selector);if(!el){el=document.createElement("meta");if(selector.startsWith('meta[property='))el.setAttribute("property",selector.match(/"([^"]+)"/)[1]);else el.name=selector.match(/"([^"]+)"/)[1];document.head.appendChild(el);}el.setAttribute(attr,value);};
+ setMeta('meta[name="description"]',"content",seoDescription);
+ setMeta('meta[property="og:title"]',"content",seoTitle);
+ setMeta('meta[property="og:description"]',"content",seoDescription);
+ setMeta('meta[property="og:url"]',"content",seoUrl);
  const hero=document.querySelector("#reviewsHeroTitle"),heading=document.querySelector("#reviewsSectionTitle");
  if(mode==="portfolio"){
   document.title="Обзор построенных домов — HOUSE STROY";
