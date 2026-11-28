@@ -47,7 +47,7 @@ async function init(){
  if(!sb||!id){root.innerHTML="<p>Объект не найден. Вернитесь в <a href='portfolio.html'>портфолио</a>.</p>";return;}
  const [{data:x,error},{data:items}] = await Promise.all([
   sb.from("portfolio_items").select("*").eq("id",id).eq("is_published",true).maybeSingle(),
-  sb.from("portfolio_items").select("id,title").eq("is_published",true).order("sort_order",{ascending:true}).order("created_at",{ascending:false})
+  sb.from("portfolio_items").select("id,title,image_url,gallery_urls").eq("is_published",true).order("sort_order",{ascending:true}).order("created_at",{ascending:false})
  ]);
  if(error||!x){root.innerHTML="<p>Не удалось найти этот объект. Возможно, он был снят с публикации. <a href='portfolio.html'>Вернуться в портфолио</a>.</p>";return;}
  projectNavigation=items||[];
@@ -72,8 +72,16 @@ async function init(){
  const currentProjectIndex=projectNavigation.findIndex(item=>String(item.id)===String(id));
  const previousProject=projectNavigation[currentProjectIndex-1],nextProject=projectNavigation[currentProjectIndex+1];
  const previousLink=root.querySelector(".portfolio-project-prev"),nextLink=root.querySelector(".portfolio-project-next");
- if(previousProject){previousLink.href="portfolio-item.html?id="+encodeURIComponent(previousProject.id);previousLink.textContent="← "+(previousProject.title||"Предыдущий проект");}else{previousLink.hidden=true;}
- if(nextProject){nextLink.href="portfolio-item.html?id="+encodeURIComponent(nextProject.id);nextLink.textContent=(nextProject.title||"Следующий проект")+" →";}else{nextLink.hidden=true;}
+ function setProjectPreview(link,project){
+  if(!project){link.hidden=true;return;}
+  link.href="portfolio-item.html?id="+encodeURIComponent(project.id);
+  const image=(project.gallery_urls&&project.gallery_urls[0])||project.image_url||"";
+  const img=link.querySelector(".portfolio-project-preview-image");
+  if(image){img.src=image;img.alt=project.title||"Фото проекта";}else{img.hidden=true;}
+  link.querySelector(".portfolio-project-preview-title").textContent=project.title||"Проект";
+ }
+ setProjectPreview(previousLink,previousProject);
+ setProjectPreview(nextLink,nextProject);
  root.querySelector(".portfolio-detail-prev")?.addEventListener("click",()=>show(index-1));
  root.querySelector(".portfolio-detail-next")?.addEventListener("click",()=>show(index+1));
  root.querySelectorAll(".portfolio-detail-thumb").forEach(b=>b.addEventListener("click",()=>show(Number(b.dataset.index))));
