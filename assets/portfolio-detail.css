@@ -24,3 +24,18 @@
 .portfolio-detail-lightbox button{position:absolute;top:18px;right:22px;width:46px;height:46px;border:0;border-radius:50%;background:#ffffff25;color:#fff;font-size:32px;cursor:pointer}
 @media(max-width:850px){.portfolio-detail-wrap{grid-template-columns:1fr;gap:20px}.portfolio-detail-main-image{height:min(72vw,600px)}.portfolio-detail-description{padding-top:0}}
 @media(max-width:560px){.portfolio-detail-stage{min-height:210px;border-radius:9px}.portfolio-detail-main-image{height:68vw;max-height:430px}.portfolio-detail-arrow{width:36px;height:48px;font-size:34px}.portfolio-detail-prev{left:7px}.portfolio-detail-next{right:7px}.portfolio-detail-thumb{flex-basis:76px;width:76px;height:56px}.portfolio-detail-description p{font-size:15px;line-height:1.65}}
+
+/* Автоматический полноэкранный просмотр фотографий портфолио */
+.portfolio-viewer{position:fixed;inset:0;z-index:100001;display:flex;align-items:center;justify-content:center;padding:56px 76px 124px;background:rgba(8,10,12,.97)}
+.portfolio-viewer-image{display:block;max-width:100%;max-height:calc(100vh - 205px);width:auto;height:auto;object-fit:contain}
+.portfolio-viewer-close{position:absolute;top:14px;right:20px;width:46px;height:46px;border:0;border-radius:50%;background:#ffffff20;color:#fff;font-size:34px;cursor:pointer}
+.portfolio-viewer-arrow{position:absolute;top:45%;width:48px;height:64px;border:0;border-radius:8px;background:#ffffff20;color:#fff;font-size:44px;cursor:pointer}
+.portfolio-viewer-prev{left:16px}.portfolio-viewer-next{right:16px}
+.portfolio-viewer-bottom{position:absolute;left:20px;right:20px;bottom:10px;display:flex;flex-direction:column;align-items:center;gap:7px}
+.portfolio-viewer-counter{color:#fff;font-size:13px}
+.portfolio-viewer-thumbs{display:flex;justify-content:flex-start;gap:8px;width:min(100%,1100px);overflow-x:auto;padding:5px 2px 9px;scrollbar-width:thin}
+.portfolio-viewer-thumb{flex:0 0 86px;width:86px;height:62px;padding:0;border:2px solid transparent;border-radius:6px;overflow:hidden;background:#222;opacity:.65;cursor:pointer}
+.portfolio-viewer-thumb img{display:block;width:100%;height:100%;object-fit:cover}
+.portfolio-viewer-thumb:hover,.portfolio-viewer-thumb.is-active{opacity:1}.portfolio-viewer-thumb.is-active{border-color:#d71920}
+body.portfolio-viewer-open{overflow:hidden}
+@media(max-width:600px){.portfolio-viewer{padding:48px 8px 112px}.portfolio-viewer-image{max-width:100%;max-height:calc(100vh - 190px)}.portfolio-viewer-arrow{width:34px;height:48px;font-size:32px}.portfolio-viewer-prev{left:5px}.portfolio-viewer-next{right:5px}.portfolio-viewer-thumb{flex-basis:68px;width:68px;height:50px}.portfolio-viewer-close{top:7px;right:8px}}
